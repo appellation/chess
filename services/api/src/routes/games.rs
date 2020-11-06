@@ -88,6 +88,6 @@ pub async fn create_game(mut req: Request<State>) -> tide::Result {
 }
 
 pub async fn get_game(req: Request<State>) -> tide::Result {
-	let game: &Game = dbg!(req.ext().unwrap());
+	let game: &Game = req.ext().unwrap();
 	Ok(tide::Body::from_json(game)?.into())
 }
