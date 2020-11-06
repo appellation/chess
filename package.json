@@ -1,0 +1,8 @@
+{
+  "name": "chess",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "services/*"
+  ]
+}

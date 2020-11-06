@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1152" height="1152" viewBox="0 0 1152 1152">
+  <g>
+    <rect x="1008" width="144" height="144" style="fill: #bfbfbf"/>
+    <rect x="1008" y="288" width="144" height="144" style="fill: #bfbfbf"/>
+    <rect x="1008" y="576" width="144" height="144" style="fill: #bfbfbf"/>
+    <rect x="1008" y="864" width="144" height="144" style="fill: #bfbfbf"/>
+    <rect x="864" y="144" width="144" height="144" style="fill: #bfbfbf"/>
+    <rect x="864" y="432" width="144" height="144" style="fill: #bfbfbf"/>
+    <rect x="864" y="720" width="144" height="144" style="fill: #bfbfbf"/>
+    <rect x="864" y="1008" width="144" height="144" style="fill: #bfbfbf"/>
+    <rect x="720" width="144" height="144" style="fill: #bfbfbf"/>
+    <rect x="720" y="288" width="144" height="144" style="fill: #bfbfbf"/>
+    <rect x="720" y="576" width="144" height="144" style="fill: #bfbfbf"/>
+    <rect x="720" y="864" width="144" height="144" style="fill: #bfbfbf"/>
+    <rect x="576" y="144" width="144" height="144" style="fill: #bfbfbf"/>
+    <rect x="576" y="432" width="144" height="144" style="fill: #bfbfbf"/>
+    <rect x="576" y="720" width="144" height="144" style="fill: #bfbfbf"/>
+    <rect x="576" y="1008" width="144" height="144" style="fill: #bfbfbf"/>
+    <rect x="432" width="144" height="144" style="fill: #bfbfbf"/>
+    <rect x="432" y="288" width="144" height="144" style="fill: #bfbfbf"/>
+    <rect x="432" y="576" width="144" height="144" style="fill: #bfbfbf"/>
+    <rect x="432" y="864" width="144" height="144" style="fill: #bfbfbf"/>
+    <rect x="288" y="144" width="144" height="144" style="fill: #bfbfbf"/>
+    <rect x="288" y="432" width="144" height="144" style="fill: #bfbfbf"/>
+    <rect x="288" y="720" width="144" height="144" style="fill: #bfbfbf"/>
+    <rect x="288" y="1008" width="144" height="144" style="fill: #bfbfbf"/>
+    <rect x="144" width="144" height="144" style="fill: #bfbfbf"/>
+    <rect x="144" y="288" width="144" height="144" style="fill: #bfbfbf"/>
+    <rect x="144" y="576" width="144" height="144" style="fill: #bfbfbf"/>
+    <rect x="144" y="864" width="144" height="144" style="fill: #bfbfbf"/>
+    <rect y="144" width="144" height="144" style="fill: #bfbfbf"/>
+    <rect y="432" width="144" height="144" style="fill: #bfbfbf"/>
+    <rect y="720" width="144" height="144" style="fill: #bfbfbf"/>
+    <rect y="1008" width="144" height="144" style="fill: #bfbfbf"/>
+  </g>
+</svg>
