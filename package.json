@@ -4,5 +4,8 @@
   "workspaces": [
     "packages/*",
     "services/*"
-  ]
+  ],
+  "devDependencies": {
+    "typescript": "^4.0.5"
+  }
 }

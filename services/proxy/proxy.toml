@@ -1,0 +1,8 @@
+timeout = "2m"
+
+[redis]
+url = "redis://localhost:6379"
+
+[amqp]
+url = "amqp://localhost:5672/%2f"
+group = "rest"

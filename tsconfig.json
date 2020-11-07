@@ -1,0 +1,12 @@
+{
+	"compilerOptions": {
+		"alwaysStrict": true,
+		"declaration": false,
+		"lib": ["ES2020"],
+		"module": "CommonJS",
+		"moduleResolution": "node",
+		"skipLibCheck": true,
+		"strict": true,
+		"target": "ES2019"
+	}
+}

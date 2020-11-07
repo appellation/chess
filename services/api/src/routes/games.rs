@@ -1,5 +1,4 @@
 use crate::{models::game::Game, util::get_user_id, State};
-use async_std::stream::StreamExt;
 use chess::Color;
 use serde::Deserialize;
 use sqlx::types::Uuid;
