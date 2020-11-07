@@ -2,22 +2,29 @@ mod assets;
 mod middleware;
 mod models;
 mod routes;
+mod serde;
 mod state;
+mod util;
 
+use sqlx::postgres::PgPool;
 pub use state::State;
+use std::{env, time::Duration};
 
 #[async_std::main]
 async fn main() -> tide::Result<()> {
+	#[cfg(debug_assertions)]
+	dotenv::dotenv()?;
 	tide::log::start();
 
-	let mongodb = mongodb::Client::with_uri_str("mongodb+srv://chess:gAu7mwq8xSvQr5jj@cluster0.ugntk.mongodb.net/chess?retryWrites=true&w=majority").await?;
+	let pool = PgPool::builder()
+		.max_size(5)
+		.connect_timeout(Duration::new(10, 0))
+		.build(&env::var("DATABASE_URL")?)
+		.await?;
 
-	let state = State {
-		db: mongodb.database("chess"),
-	};
+	let state = State { db: pool };
 
 	let mut app = tide::with_state(state);
-	app.with(middleware::user::get_user);
 	app.at("/games").post(routes::games::create_game);
 	app.at("/games/:game_id")
 		.with(middleware::game::get_game)

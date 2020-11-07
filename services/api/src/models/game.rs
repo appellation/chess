@@ -1,50 +1,30 @@
-use mongodb::bson::oid::ObjectId;
-use serde::{
-	de::{Deserializer, Error, Unexpected, Visitor},
-	ser::Serializer,
-	Deserialize, Serialize,
-};
-use std::{fmt, str::FromStr};
-
-struct GameVisitor;
-
-impl<'de> Visitor<'de> for GameVisitor {
-	type Value = chess::Game;
-
-	fn visit_string<E>(self, v: String) -> Result<Self::Value, E>
-	where
-		E: Error,
-	{
-		Self::Value::from_str(&v).map_err(|_| Error::invalid_value(Unexpected::Str(&v), &self))
-	}
-
-	fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-		write!(formatter, "FEN string")
-	}
-}
-
-fn serialize_game<S>(game: &chess::Game, s: S) -> Result<S::Ok, S::Error>
-where
-	S: Serializer,
-{
-	s.serialize_str(&game.current_position().to_string())
-}
-
-fn deserialize_game<'de, D>(d: D) -> Result<chess::Game, D::Error>
-where
-	D: Deserializer<'de>,
-{
-	d.deserialize_string(GameVisitor {})
-}
+use serde::{Deserialize, Serialize};
+use sqlx::{types::Uuid, FromRow, Row};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Game {
-	pub _id: ObjectId,
-	pub white_id: ObjectId,
-	pub black_id: ObjectId,
-	#[serde(
-		serialize_with = "serialize_game",
-		deserialize_with = "deserialize_game"
-	)]
+	#[serde(with = "crate::serde::uuid")]
+	pub id: Uuid,
+	#[serde(with = "crate::serde::uuid")]
+	pub white_id: Uuid,
+	#[serde(with = "crate::serde::uuid")]
+	pub black_id: Uuid,
+	#[serde(with = "crate::serde::game")]
 	pub board: chess::Game,
+}
+
+impl<'a> FromRow<'a, sqlx::postgres::PgRow<'a>> for Game {
+	fn from_row(row: &sqlx::postgres::PgRow<'a>) -> sqlx::Result<Self> {
+		let board: &str = row.try_get("board")?;
+		// TODO: make error better
+		let board: chess::Board = board.parse().map_err(|_| sqlx::Error::PoolClosed)?;
+		let game = chess::Game::new_with_board(board);
+
+		Ok(Self {
+			id: row.try_get("id")?,
+			white_id: row.try_get("white_id")?,
+			black_id: row.try_get("black_id")?,
+			board: game,
+		})
+	}
 }

@@ -1,5 +1,5 @@
 use crate::{models::game::Game, State};
-use mongodb::bson::{doc, from_document, oid::ObjectId};
+use sqlx::{prelude::*, types::Uuid};
 use std::{future::Future, pin::Pin};
 use tide::{Next, Request, Response, Result, StatusCode};
 
@@ -8,17 +8,15 @@ pub fn get_game<'a>(
 	next: Next<'a, State>,
 ) -> Pin<Box<dyn Future<Output = Result> + Send + 'a>> {
 	Box::pin(async {
-		let game_id = dbg!(ObjectId::with_string(req.param("game_id")?)?);
-		let maybe_game = req
-			.state()
-			.db
-			.collection("games")
-			.find_one(doc! { "_id": game_id.clone() }, None)
+		let game_id = req.param("game_id")?.parse::<Uuid>()?;
+		let mut conn = req.state().db.acquire().await?;
+		let maybe_game = sqlx::query_as::<_, Game>("select * from games where id = $1")
+			.bind(game_id)
+			.fetch_optional(&mut conn)
 			.await?;
 
 		match maybe_game {
-			Some(doc) => {
-				let game: Game = from_document(doc)?;
+			Some(game) => {
 				req.set_ext(game);
 				Ok(next.run(req).await)
 			}

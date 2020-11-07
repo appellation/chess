@@ -1,6 +1,6 @@
-use mongodb::Database;
+use sqlx::postgres::PgPool;
 
 #[derive(Debug, Clone)]
 pub struct State {
-	pub db: Database,
+	pub db: PgPool,
 }

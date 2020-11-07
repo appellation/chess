@@ -1,10 +1,8 @@
-use crate::{
-	models::{game::Game, user::User},
-	State,
-};
+use crate::{models::game::Game, util::get_user_id, State};
+use async_std::stream::StreamExt;
 use chess::Color;
-use mongodb::bson::{doc, oid::ObjectId, to_document};
 use serde::Deserialize;
+use sqlx::types::Uuid;
 use tide::Request;
 
 pub mod board;
@@ -41,50 +39,33 @@ impl Default for CreateGameSide {
 
 #[derive(Debug, Deserialize)]
 struct CreateGame {
-	target_id: String,
+	#[serde(with = "crate::serde::uuid")]
+	target_id: Uuid,
 	#[serde(default)]
 	side: CreateGameSide,
 }
 
 pub async fn create_game(mut req: Request<State>) -> tide::Result {
 	let body: CreateGame = req.body_json().await?;
-	let user: &User = req.ext().unwrap();
+	let user_id = get_user_id(&req)?;
 
-	let target = req
-		.state()
-		.db
-		.collection("users")
-		.find_one(
-			doc! { "_id": ObjectId::with_string(&body.target_id)? },
-			None,
-		)
-		.await?;
+	let mut conn = req.state().db.acquire().await?;
 
-	match target {
-		None => Ok(tide::Response::new(tide::StatusCode::BadRequest)),
-		Some(_) => {
-			let (white_id, black_id) = match body.side.into() {
-				Color::Black => (ObjectId::with_string(&body.target_id)?, user._id.clone()),
-				Color::White => (user._id.clone(), ObjectId::with_string(&body.target_id)?),
-			};
+	let (white_id, black_id) = match body.side.into() {
+		Color::Black => (body.target_id, user_id),
+		Color::White => (user_id, body.target_id),
+	};
 
-			let game = Game {
-				_id: ObjectId::default(),
-				white_id,
-				black_id,
-				board: chess::Game::new(),
-			};
+	let row = sqlx::query!(
+		"insert into games (white_id, black_id, board) values ($1, $2, $3) returning id",
+		white_id,
+		black_id,
+		chess::Board::default().to_string()
+	)
+	.fetch_one(&mut conn)
+	.await?;
 
-			let save_result = req
-				.state()
-				.db
-				.collection("games")
-				.insert_one(to_document(&game)?, None)
-				.await?;
-
-			Ok(tide::Body::from_string(save_result.inserted_id.to_string()).into())
-		}
-	}
+	Ok(tide::Body::from_string(row.id.to_string()).into())
 }
 
 pub async fn get_game(req: Request<State>) -> tide::Result {

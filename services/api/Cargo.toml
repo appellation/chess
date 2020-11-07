@@ -9,10 +9,11 @@ edition = "2018"
 [dependencies]
 async-std = { version = "1.6.0", features = ["attributes"] }
 chess = { git = "https://github.com/jordanbray/chess.git", rev = "a09032e36a1d10fdeab163afd943df66c00b897b" }
-mongodb = { version = "1.1.1", features = ["async-std-runtime"], default-features = false }
+dotenv = "0.15.0"
 png = "0.16.7"
-serde = "1.0.117"
 rand = "0.7.3"
 resvg = "0.11.0"
+serde = "1.0.117"
+sqlx = { version = "0.3.5", features = ["postgres", "uuid", "tls"] }
 tide = "0.14.0"
 usvg = "0.11.0"
