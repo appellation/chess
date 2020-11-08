@@ -1,0 +1,28 @@
+name: Build
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+  release:
+    types: [published]
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service-name: [api, bot, gateway, proxy]
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build
+        uses: jerray/publish-docker-action@v1
+        with:
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: docker.pkg.github.com
+          repository: ${{ github.repository }}/${{ matrix.service-name }}
+          auto_tag: true
+          file: services/${{ matrix.service-name }}/Dockerfile
