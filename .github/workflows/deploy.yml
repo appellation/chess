@@ -50,5 +50,3 @@ jobs:
           docker-compose pull
           docker-compose build
           docker-compose up -d" | doctl compute ssh 215874001
-        env:
-          GH_TOKEN: ${{ secrets.PERSONAL_GH_TOKEN }}
