@@ -47,6 +47,7 @@ jobs:
 
           mv -f ../.env .
 
+          chmod +x ./run.sh
           ./run.sh prod pull
           ./run.sh prod build
           ./run.sh prod up -d" | doctl compute ssh 215874001
