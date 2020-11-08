@@ -1,0 +1,36 @@
+version: '3'
+services:
+  bot:
+    build:
+      dockerfile: services/bot/Dockerfile
+      context: .
+    environment:
+      AMQP_URL: rabbit
+    env_file: .env
+  gateway:
+    build:
+      dockerfile: services/gateway/Dockerfile
+      context: .
+    environment:
+      AMQP_URL: amqp://rabbit
+    env_file: .env
+  proxy:
+    build:
+      dockerfile: services/proxy/Dockerfile
+      context: .
+    environment:
+      REDIS_URL: redis://redis
+      AMQP_URL: amqp://rabbit/%2f
+      RUST_LOG: info
+    env_file: .env
+  api:
+    build:
+      dockerfile: services/api/Dockerfile
+      context: .
+      args:
+        - DATABASE_URL=${DATABASE_URL}
+    env_file: .env
+  rabbit:
+    image: rabbitmq
+  redis:
+    image: redis

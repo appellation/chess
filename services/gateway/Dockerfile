@@ -1,2 +1,2 @@
 FROM spectacles/gateway
-COPY gateway.toml /
+COPY services/gateway/gateway.toml /

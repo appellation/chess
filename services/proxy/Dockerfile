@@ -1,2 +1,2 @@
 FROM spectacles/proxy
-COPY proxy.toml /
+COPY services/proxy/proxy.toml /
