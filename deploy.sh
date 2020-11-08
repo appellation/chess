@@ -5,6 +5,7 @@ if [ ! -d "./chess" ]; then
 	cd chess
 else
 	cd chess
+	git remote set-url origin https://appellation:$GITHUB_TOKEN@github.com/appellation/chess.git
 	git fetch origin
 	git reset --hard origin/master
 fi
