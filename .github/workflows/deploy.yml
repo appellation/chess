@@ -1,0 +1,38 @@
+name: Deploy
+
+on:
+  release:
+    types:
+      - created
+  workflow_dispatch:
+
+jobs:
+  digitalocean:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+
+      - name: Install SSH key
+        uses: shimataro/ssh-key-action@v1
+        with:
+          key: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+          known_hosts: ${{ secrets.DIGITALOCEAN_KNOWN_HOSTS }}
+
+      - name: Set environment
+        run: >
+          DATABASE_URL=doctl db get e66951fa-2a87-4022-a526-e2a57a556417 --output json | jq .[0].private_connection.uri -r
+          doctl compute ssh --ssh-command "
+          rm .env &&
+          touch .env &&
+          echo \"$DATABASE_URL\" >> .env
+          echo \"$DISCORD_TOKEN\" >> .env"
+        env:
+          DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
+
+      - name: Deploy
+        run: cat deploy.sh | doctl compute ssh 215874001
