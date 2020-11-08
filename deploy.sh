@@ -5,6 +5,6 @@ git reset --hard origin/master
 
 mv -f ../.env .
 
-docker-compose pull
-docker-compose build
-docker-compose up -d
+./run.sh prod pull
+./run.sh prod build
+./run.sh prod up -d
