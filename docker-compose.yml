@@ -27,8 +27,6 @@ services:
     build:
       dockerfile: services/api/Dockerfile
       context: .
-      args:
-        - DATABASE_URL=${DATABASE_URL}
     env_file: .env
   rabbit:
     image: rabbitmq

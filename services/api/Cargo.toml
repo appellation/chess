@@ -17,3 +17,8 @@ serde = "1.0.117"
 sqlx = { version = "0.3.5", features = ["postgres", "uuid", "tls"] }
 tide = "0.14.0"
 usvg = "0.11.0"
+
+[features]
+sql-validation = []
+
+default = ["sql-validation"]
