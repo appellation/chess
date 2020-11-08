@@ -35,4 +35,20 @@ jobs:
           DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
 
       - name: Deploy
-        run: cat deploy.sh | doctl compute ssh 215874001
+        run: |
+          echo "if [ ! -d "./chess" ]; then
+            git clone https://appellation:${GH_TOKEN}@github.com/appellation/chess.git
+            cd chess
+          else
+            cd chess
+            git fetch origin
+            git reset --hard origin/master
+          fi
+
+          mv -f ../.env .
+
+          docker-compose pull
+          docker-compose build
+          docker-compose up -d" | doctl compute ssh 215874001
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

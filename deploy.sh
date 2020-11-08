@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ ! -d "./chess" ]; then
-	git clone https://appellation:$GITHUB_ACCESS_TOKEN@github.com/appellation/chess.git
+	git clone https://appellation:$GITHUB_TOKEN@github.com/appellation/chess.git
 	cd chess
 else
 	cd chess
