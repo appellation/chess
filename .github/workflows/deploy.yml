@@ -25,7 +25,7 @@ jobs:
 
       - name: Set environment
         run: >
-          DATABASE_URL=doctl db get e66951fa-2a87-4022-a526-e2a57a556417 --output json | jq .[0].private_connection.uri -r
+          DATABASE_URL=$(doctl db get e66951fa-2a87-4022-a526-e2a57a556417 --output json | jq .[0].private_connection.uri -r)
 
           doctl compute ssh --ssh-command "
           rm .env &&
