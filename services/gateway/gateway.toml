@@ -1,0 +1,10 @@
+# token = ""
+events = ["MESSAGE_CREATE"]
+intents = ["GUILD_MESSAGES"]
+
+[broker]
+type = "amqp"
+group = "gateway"
+
+[amqp]
+url = "amqp://localhost"
