@@ -1,7 +1,12 @@
-use crate::{models::game::Game, util::get_user_id, State};
+use crate::{
+	models::{game::Game, user::User},
+	State,
+};
 use chess::Color;
 use serde::Deserialize;
-use sqlx::{types::Uuid, prelude::*};
+#[cfg(not(feature = "sql-validation"))]
+use sqlx::prelude::*;
+use sqlx::types::Uuid;
 use tide::Request;
 
 pub mod board;
@@ -46,26 +51,32 @@ struct CreateGame {
 
 pub async fn create_game(mut req: Request<State>) -> tide::Result {
 	let body: CreateGame = req.body_json().await?;
-	let user_id = get_user_id(&req)?;
+	let user = req.ext::<User>().unwrap();
 
 	let mut conn = req.state().db.acquire().await?;
 
 	let (white_id, black_id) = match body.side.into() {
-		Color::Black => (body.target_id, user_id),
-		Color::White => (user_id, body.target_id),
+		Color::Black => (body.target_id, user.id),
+		Color::White => (user.id, body.target_id),
 	};
 
 	#[cfg(not(feature = "sql-validation"))]
-	let id: Uuid = sqlx::query("insert into games (white_id, black_id, board) values ($1, $2, $3) returning id")
-		.bind(white_id)
-		.bind(black_id)
-		.bind(chess::Board::default().to_string())
-		.fetch(&mut conn)
-		.next()
-		.await?
-		.ok_or_else(|| tide::Error::from_str(tide::StatusCode::InternalServerError, "unable to create game"))?
-		.try_get("id")?;
-
+	let id: Uuid = sqlx::query(
+		"insert into games (white_id, black_id, board) values ($1, $2, $3) returning id",
+	)
+	.bind(white_id)
+	.bind(black_id)
+	.bind(chess::Board::default().to_string())
+	.fetch(&mut conn)
+	.next()
+	.await?
+	.ok_or_else(|| {
+		tide::Error::from_str(
+			tide::StatusCode::InternalServerError,
+			"unable to create game",
+		)
+	})?
+	.try_get("id")?;
 
 	#[cfg(feature = "sql-validation")]
 	let id = sqlx::query!(

@@ -4,7 +4,6 @@ mod models;
 mod routes;
 mod serde;
 mod state;
-mod util;
 
 use sqlx::postgres::PgPool;
 pub use state::State;
@@ -25,12 +24,15 @@ async fn main() -> tide::Result<()> {
 	let state = State { db: pool };
 
 	let mut app = tide::with_state(state);
-	app.at("/games").post(routes::games::create_game);
+	app.at("/games")
+		.with(middleware::user::get_user)
+		.post(routes::games::create_game);
 	app.at("/games/:game_id")
 		.with(middleware::game::get_game)
 		.get(routes::games::get_game);
 	app.at("/games/:game_id/moves")
 		.with(middleware::game::get_game)
+		.with(middleware::user::get_user)
 		.put(routes::games::moves::make_move);
 	app.at("/games/:game_id/board")
 		.with(middleware::game::get_game)

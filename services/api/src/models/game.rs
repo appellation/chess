@@ -11,6 +11,7 @@ pub struct Game {
 	pub black_id: Uuid,
 	#[serde(with = "crate::serde::game")]
 	pub board: chess::Game,
+	pub moves: Vec<String>,
 }
 
 impl<'a> FromRow<'a, sqlx::postgres::PgRow<'a>> for Game {
@@ -25,6 +26,7 @@ impl<'a> FromRow<'a, sqlx::postgres::PgRow<'a>> for Game {
 			white_id: row.try_get("white_id")?,
 			black_id: row.try_get("black_id")?,
 			board: game,
+			moves: row.try_get("moves")?,
 		})
 	}
 }

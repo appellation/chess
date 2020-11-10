@@ -9,11 +9,11 @@ struct GameVisitor;
 impl<'de> Visitor<'de> for GameVisitor {
 	type Value = chess::Game;
 
-	fn visit_string<E>(self, v: String) -> Result<Self::Value, E>
+	fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
 	where
 		E: Error,
 	{
-		Self::Value::from_str(&v).map_err(|_| Error::invalid_value(Unexpected::Str(&v), &self))
+		Self::Value::from_str(v).map_err(|_| Error::invalid_value(Unexpected::Str(&v), &self))
 	}
 
 	fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {

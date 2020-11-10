@@ -10,13 +10,6 @@ struct UuidVisitor;
 impl<'de> Visitor<'de> for UuidVisitor {
 	type Value = Uuid;
 
-	fn visit_string<E>(self, v: String) -> Result<Self::Value, E>
-	where
-		E: Error,
-	{
-		Self::Value::parse_str(&v).map_err(|_| Error::invalid_value(Unexpected::Str(&v), &self))
-	}
-
 	fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
 	where
 		E: Error,
