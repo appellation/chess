@@ -3,8 +3,6 @@ use crate::{
 	State,
 };
 use serde::Deserialize;
-#[cfg(not(feature = "sql-validation"))]
-use sqlx::prelude::*;
 use sqlx::types::Uuid;
 use std::{future::Future, pin::Pin};
 use tide::{Error, Next, Request, Result, StatusCode};
@@ -28,7 +26,6 @@ pub fn get_user<'a>(
 		let mut conn = req.state().db.acquire().await?;
 
 		let user: User = match account_type {
-			#[cfg(feature = "sql-validation")]
 			Some(account_type) => {
 				sqlx::query_as!(
 					User,
@@ -39,27 +36,9 @@ pub fn get_user<'a>(
 				.fetch_one(&mut conn)
 				.await?
 			}
-			#[cfg(not(feature = "sql-validation"))]
-			Some(account_type) => {
-				sqlx::query_as("select * from get_or_create_user($1, $2)")
-					.bind(account_id)
-					.bind(account_type)
-					.fetch_one(&mut conn)
-					.await?
-			}
-			#[cfg(feature = "sql-validation")]
 			None => {
 				let account_id = account_id.parse::<Uuid>()?;
 				sqlx::query_as!(User, "select * from users where id = $1", account_id)
-					.fetch_one(&mut conn)
-					.await
-					.map_err(|_| Error::from_str(StatusCode::Unauthorized, "user doesn't exist"))?
-			}
-			#[cfg(not(feature = "sql-validation"))]
-			None => {
-				let account_id = account_id.parse::<Uuid>()?;
-				sqlx::query_as("select * from users where id = $1")
-					.bind(account_id)
 					.fetch_one(&mut conn)
 					.await
 					.map_err(|_| Error::from_str(StatusCode::Unauthorized, "user doesn't exist"))?

@@ -7,8 +7,6 @@ use crate::{
 };
 use chess::Color;
 use serde::Deserialize;
-#[cfg(not(feature = "sql-validation"))]
-use sqlx::{postgres::PgRow, prelude::*, types::Uuid};
 use tide::Request;
 
 pub mod board;
@@ -58,7 +56,6 @@ pub async fn create_game(mut req: Request<State>) -> tide::Result {
 	let mut conn = req.state().db.acquire().await?;
 
 	let target_id = match body.account_type {
-		#[cfg(feature = "sql-validation")]
 		Some(account_type) => {
 			let account_type: &str = account_type.into();
 			sqlx::query!(
@@ -71,16 +68,6 @@ pub async fn create_game(mut req: Request<State>) -> tide::Result {
 			.id
 			.unwrap()
 		}
-		#[cfg(not(feature = "sql-validation"))]
-		Some(account_type) => {
-			let account_type: &str = account_type.into();
-			sqlx::query("select id from get_or_create_user($1, $2)")
-				.bind(body.target_id)
-				.bind(account_type)
-				.map(|row: PgRow| row.try_get("id"))
-				.fetch_one(&mut conn)
-				.await??
-		}
 		None => body.target_id.parse()?,
 	};
 
@@ -89,18 +76,8 @@ pub async fn create_game(mut req: Request<State>) -> tide::Result {
 		Color::White => (user.id, target_id),
 	};
 
-	#[cfg(feature = "sql-validation")]
 	let is_already_playing = sqlx::query!("select id from games where (white_id = $1 or black_id = $1) and (white_id = $2 or black_id = $2) and result <> null", white_id, black_id)
 		.fetch_optional(&mut conn)
-		.await?
-		.is_some();
-
-	#[cfg(not(feature = "sql-validation"))]
-	let is_already_playing = sqlx::query("select id from games where (white_id = $1 or black_id = $1) and (white_id = $2 or black_id = $2) and result <> null")
-		.bind(white_id)
-		.bind(black_id)
-		.fetch(&mut conn)
-		.next()
 		.await?
 		.is_some();
 
@@ -110,18 +87,6 @@ pub async fn create_game(mut req: Request<State>) -> tide::Result {
 		return Ok(res)
 	}
 
-	#[cfg(not(feature = "sql-validation"))]
-	let id: Uuid = sqlx::query(
-		"insert into games (white_id, black_id, board) values ($1, $2, $3) returning id",
-	)
-	.bind(white_id)
-	.bind(black_id)
-	.bind(chess::Board::default().to_string())
-	.map(|row: PgRow| row.try_get("id"))
-	.fetch_one(&mut conn)
-	.await??;
-
-	#[cfg(feature = "sql-validation")]
 	let id = sqlx::query!(
 		"insert into games (white_id, black_id, board) values ($1, $2, $3) returning id",
 		white_id,

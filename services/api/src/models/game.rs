@@ -17,10 +17,9 @@ pub struct Game {
 
 impl<'a> FromRow<'a, PgRow<'a>> for Game {
 	fn from_row(row: &PgRow<'a>) -> sqlx::Result<Self> {
-		let board: &str = row.try_get("board")?;
-		// TODO: make error better
-		let board: Board = board
-			.parse()
+		let board = row
+			.try_get::<&str, _>("board")?
+			.parse::<Board>()
 			.map_err(|e| sqlx::Error::Decode(Box::new(e)))?;
 		let game = chess::Game::new_with_board(board);
 
