@@ -523,12 +523,14 @@ checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 [[package]]
 name = "chess"
 version = "3.1.1"
-source = "git+https://github.com/jordanbray/chess.git?rev=a09032e36a1d10fdeab163afd943df66c00b897b#a09032e36a1d10fdeab163afd943df66c00b897b"
+source = "git+https://github.com/appellation/chess-1?rev=2d64c07d35bbaacb60bed1a37bf5bc2ecfab0d55#2d64c07d35bbaacb60bed1a37bf5bc2ecfab0d55"
 dependencies = [
  "arrayvec",
  "failure",
  "nodrop",
  "rand",
+ "serde",
+ "strum",
 ]
 
 [[package]]

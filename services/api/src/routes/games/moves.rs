@@ -28,14 +28,16 @@ pub async fn make_move(mut req: Request<State>) -> tide::Result {
 				.map_err(|e| tide::Error::from_str(tide::StatusCode::BadRequest, e.to_string()))?;
 			game.board.make_move(chess_move);
 			game.moves.push(chess_move.to_string());
+			let result: Option<&str> = game.board.result().map(|r| r.into());
 
 			let mut conn = req.state().db.acquire().await?;
 
 			#[cfg(feature = "sql-validation")]
 			sqlx::query!(
-				"update games set board = $1, moves = array_append(moves, $2) where id = $3",
+				"update games set board = $1, moves = array_append(moves, $2), result = $3 where id = $4",
 				game.board.current_position().to_string(),
 				chess_move.to_string(),
+				result,
 				game.id
 			)
 			.execute(&mut conn)
@@ -43,10 +45,11 @@ pub async fn make_move(mut req: Request<State>) -> tide::Result {
 
 			#[cfg(not(feature = "sql-validation"))]
 			sqlx::query(
-				"update games set board = $1, moves = array_append(moves, $2) where id = $3",
+				"update games set board = $1, moves = array_append(moves, $2), result = $3 where id = $4",
 			)
 			.bind(game.board.current_position().to_string())
 			.bind(chess_move.to_string())
+			.bind(result)
 			.bind(game.id)
 			.execute(&mut conn)
 			.await?;

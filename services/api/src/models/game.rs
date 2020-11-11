@@ -1,3 +1,4 @@
+use chess::Board;
 use serde::{Deserialize, Serialize};
 use sqlx::{types::Uuid, FromRow, Row};
 
@@ -9,16 +10,16 @@ pub struct Game {
 	pub white_id: Uuid,
 	#[serde(with = "crate::serde::uuid")]
 	pub black_id: Uuid,
-	#[serde(with = "crate::serde::game")]
 	pub board: chess::Game,
 	pub moves: Vec<String>,
+	pub result: Option<chess::GameResult>,
 }
 
 impl<'a> FromRow<'a, sqlx::postgres::PgRow<'a>> for Game {
 	fn from_row(row: &sqlx::postgres::PgRow<'a>) -> sqlx::Result<Self> {
 		let board: &str = row.try_get("board")?;
 		// TODO: make error better
-		let board: chess::Board = board.parse().map_err(|_| sqlx::Error::PoolClosed)?;
+		let board: Board = board.parse().map_err(|_| sqlx::Error::PoolClosed)?;
 		let game = chess::Game::new_with_board(board);
 
 		Ok(Self {
@@ -27,6 +28,7 @@ impl<'a> FromRow<'a, sqlx::postgres::PgRow<'a>> for Game {
 			black_id: row.try_get("black_id")?,
 			board: game,
 			moves: row.try_get("moves")?,
+			result: None,
 		})
 	}
 }

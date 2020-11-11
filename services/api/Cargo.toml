@@ -8,7 +8,7 @@ edition = "2018"
 
 [dependencies]
 async-std = { version = "1.6.0", features = ["attributes"] }
-chess = { git = "https://github.com/jordanbray/chess.git", rev = "a09032e36a1d10fdeab163afd943df66c00b897b" }
+chess = { git = "https://github.com/appellation/chess-1", rev = "2d64c07d35bbaacb60bed1a37bf5bc2ecfab0d55", features = ["serde", "strum"] }
 dotenv = "0.15.0"
 png = "0.16.7"
 rand = "0.7.3"

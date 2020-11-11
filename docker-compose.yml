@@ -3,6 +3,7 @@ services:
   bot:
     environment:
       AMQP_URL: rabbit
+      API_URL: http://api:8080
     env_file: .env
   gateway:
     environment:
@@ -16,6 +17,8 @@ services:
     env_file: .env
   api:
     env_file: .env
+    expose:
+      - "8080"
   rabbit:
     image: rabbitmq
   redis:

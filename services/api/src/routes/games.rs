@@ -1,12 +1,11 @@
 use crate::{
-	models::{game::Game, user::User},
+	models::{game::Game, user::{User, AccountType}},
 	State,
 };
 use chess::Color;
 use serde::Deserialize;
 #[cfg(not(feature = "sql-validation"))]
-use sqlx::prelude::*;
-use sqlx::types::Uuid;
+use sqlx::{prelude::*, postgres::PgRow, types::Uuid};
 use tide::Request;
 
 pub mod board;
@@ -43,8 +42,8 @@ impl Default for CreateGameSide {
 
 #[derive(Debug, Deserialize)]
 struct CreateGame {
-	#[serde(with = "crate::serde::uuid")]
-	target_id: Uuid,
+	target_id: String,
+	account_type: Option<AccountType>,
 	#[serde(default)]
 	side: CreateGameSide,
 }
@@ -55,9 +54,32 @@ pub async fn create_game(mut req: Request<State>) -> tide::Result {
 
 	let mut conn = req.state().db.acquire().await?;
 
+	let target_id = match body.account_type {
+		#[cfg(feature = "sql-validation")]
+		Some(account_type) => {
+			let account_type: &str = account_type.into();
+			sqlx::query!("select id from get_or_create_user($1, $2)", body.target_id, account_type)
+				.fetch_one(&mut conn)
+				.await?
+				.id
+				.unwrap()
+		},
+		#[cfg(not(feature = "sql-validation"))]
+		Some(account_type) => {
+			let account_type: &str = account_type.into();
+			sqlx::query("select id from get_or_create_user($1, $2)")
+				.bind(body.target_id)
+				.bind(account_type)
+				.map(|row: PgRow| row.try_get("id"))
+				.fetch_one(&mut conn)
+				.await??
+		}
+		None => body.target_id.parse()?,
+	};
+
 	let (white_id, black_id) = match body.side.into() {
-		Color::Black => (body.target_id, user.id),
-		Color::White => (user.id, body.target_id),
+		Color::Black => (target_id, user.id),
+		Color::White => (user.id, target_id),
 	};
 
 	#[cfg(not(feature = "sql-validation"))]
@@ -67,16 +89,9 @@ pub async fn create_game(mut req: Request<State>) -> tide::Result {
 	.bind(white_id)
 	.bind(black_id)
 	.bind(chess::Board::default().to_string())
-	.fetch(&mut conn)
-	.next()
-	.await?
-	.ok_or_else(|| {
-		tide::Error::from_str(
-			tide::StatusCode::InternalServerError,
-			"unable to create game",
-		)
-	})?
-	.try_get("id")?;
+	.map(|row: PgRow| row.try_get("id"))
+	.fetch_one(&mut conn)
+	.await??;
 
 	#[cfg(feature = "sql-validation")]
 	let id = sqlx::query!(

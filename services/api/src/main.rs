@@ -37,6 +37,6 @@ async fn main() -> tide::Result<()> {
 	app.at("/games/:game_id/board")
 		.with(middleware::game::get_game)
 		.get(routes::games::board::get_board);
-	app.listen("127.0.0.1:8080").await?;
+	app.listen("0.0.0.0:8080").await?;
 	Ok(())
 }
