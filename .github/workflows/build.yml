@@ -27,7 +27,7 @@ jobs:
           auto_tag: true
           file: services/${{ matrix.service-name }}/Dockerfile
           network: host
-          build_args: DATABASE_URL=postgresql://postgres:postgres@localhost:5432/postgres
+          build_args: DATABASE_URL=postgresql://postgres:postgres@postgres:5432/postgres
     services:
       postgres:
         image: postgres
