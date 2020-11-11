@@ -1,6 +1,6 @@
-use chess::Board;
+use chess::{Board, ChessMove, GameResult};
 use serde::{Deserialize, Serialize};
-use sqlx::{types::Uuid, FromRow, Row};
+use sqlx::{postgres::PgRow, types::Uuid, FromRow, Row};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Game {
@@ -11,23 +11,32 @@ pub struct Game {
 	#[serde(with = "crate::serde::uuid")]
 	pub black_id: Uuid,
 	pub board: chess::Game,
-	pub moves: Vec<String>,
-	pub result: Option<chess::GameResult>,
+	pub moves: Vec<ChessMove>,
+	pub result: Option<GameResult>,
 }
 
-impl<'a> FromRow<'a, sqlx::postgres::PgRow<'a>> for Game {
-	fn from_row(row: &sqlx::postgres::PgRow<'a>) -> sqlx::Result<Self> {
+impl<'a> FromRow<'a, PgRow<'a>> for Game {
+	fn from_row(row: &PgRow<'a>) -> sqlx::Result<Self> {
 		let board: &str = row.try_get("board")?;
 		// TODO: make error better
-		let board: Board = board.parse().map_err(|_| sqlx::Error::PoolClosed)?;
+		let board: Board = board
+			.parse()
+			.map_err(|e| sqlx::Error::Decode(Box::new(e)))?;
 		let game = chess::Game::new_with_board(board);
+
+		let moves = row
+			.try_get::<Vec<String>, _>("moves")?
+			.iter()
+			.map(|move_text| ChessMove::from_san(&board, move_text))
+			.collect::<Result<_, _>>()
+			.map_err(|e| sqlx::Error::Decode(Box::new(e)))?;
 
 		Ok(Self {
 			id: row.try_get("id")?,
 			white_id: row.try_get("white_id")?,
 			black_id: row.try_get("black_id")?,
 			board: game,
-			moves: row.try_get("moves")?,
+			moves,
 			result: None,
 		})
 	}

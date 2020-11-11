@@ -1,11 +1,14 @@
 use crate::{
-	models::{game::Game, user::{User, AccountType}},
+	models::{
+		game::Game,
+		user::{AccountType, User},
+	},
 	State,
 };
 use chess::Color;
 use serde::Deserialize;
 #[cfg(not(feature = "sql-validation"))]
-use sqlx::{prelude::*, postgres::PgRow, types::Uuid};
+use sqlx::{postgres::PgRow, prelude::*, types::Uuid};
 use tide::Request;
 
 pub mod board;
@@ -58,12 +61,16 @@ pub async fn create_game(mut req: Request<State>) -> tide::Result {
 		#[cfg(feature = "sql-validation")]
 		Some(account_type) => {
 			let account_type: &str = account_type.into();
-			sqlx::query!("select id from get_or_create_user($1, $2)", body.target_id, account_type)
-				.fetch_one(&mut conn)
-				.await?
-				.id
-				.unwrap()
-		},
+			sqlx::query!(
+				"select id from get_or_create_user($1, $2)",
+				body.target_id,
+				account_type
+			)
+			.fetch_one(&mut conn)
+			.await?
+			.id
+			.unwrap()
+		}
 		#[cfg(not(feature = "sql-validation"))]
 		Some(account_type) => {
 			let account_type: &str = account_type.into();
@@ -81,6 +88,27 @@ pub async fn create_game(mut req: Request<State>) -> tide::Result {
 		Color::Black => (target_id, user.id),
 		Color::White => (user.id, target_id),
 	};
+
+	#[cfg(feature = "sql-validation")]
+	let is_already_playing = sqlx::query!("select id from games where (white_id = $1 or black_id = $1) and (white_id = $2 or black_id = $2) and result <> null", white_id, black_id)
+		.fetch_optional(&mut conn)
+		.await?
+		.is_some();
+
+	#[cfg(not(feature = "sql-validation"))]
+	let is_already_playing = sqlx::query("select id from games where (white_id = $1 or black_id = $1) and (white_id = $2 or black_id = $2) and result <> null")
+		.bind(white_id)
+		.bind(black_id)
+		.fetch(&mut conn)
+		.next()
+		.await?
+		.is_some();
+
+	if is_already_playing {
+		let mut res = tide::Response::new(tide::StatusCode::BadRequest);
+		res.set_body("already playing");
+		return Ok(res)
+	}
 
 	#[cfg(not(feature = "sql-validation"))]
 	let id: Uuid = sqlx::query(

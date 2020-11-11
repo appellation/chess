@@ -27,7 +27,7 @@ pub async fn make_move(mut req: Request<State>) -> tide::Result {
 			let chess_move = ChessMove::from_san(&game.board.current_position(), &move_request.san)
 				.map_err(|e| tide::Error::from_str(tide::StatusCode::BadRequest, e.to_string()))?;
 			game.board.make_move(chess_move);
-			game.moves.push(chess_move.to_string());
+			game.moves.push(chess_move);
 			let result: Option<&str> = game.board.result().map(|r| r.into());
 
 			let mut conn = req.state().db.acquire().await?;
