@@ -18,7 +18,7 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Build
-        uses: appellation/publish-docker-action@v1.1.1
+        uses: jerray/publish-docker-action@v1.0.5
         with:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
@@ -26,7 +26,6 @@ jobs:
           repository: ${{ github.repository }}/${{ matrix.service-name }}
           auto_tag: true
           file: services/${{ matrix.service-name }}/Dockerfile
-          network: host
           build_args: DATABASE_URL=postgresql://postgres:postgres@postgres:5432/postgres
     services:
       postgres:
