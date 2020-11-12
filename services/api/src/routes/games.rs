@@ -84,7 +84,7 @@ pub async fn create_game(mut req: Request<State>) -> tide::Result {
 	if is_already_playing {
 		let mut res = tide::Response::new(tide::StatusCode::BadRequest);
 		res.set_body("already playing");
-		return Ok(res)
+		return Ok(res);
 	}
 
 	let id = sqlx::query!(
