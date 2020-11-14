@@ -42,6 +42,7 @@ pub async fn make_move(mut req: Request<State>) -> tide::Result {
 			.execute(pool)
 			.await?;
 
+			let game = game.with_users(pool).await?;
 			Ok(tide::Body::from_json(&game)?.into())
 		}
 		_ => Ok(tide::Response::new(tide::StatusCode::BadRequest)),

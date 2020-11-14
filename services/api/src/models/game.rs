@@ -1,6 +1,9 @@
+use super::user::UserWithAccounts;
+use async_std::prelude::*;
 use chess::{Board, ChessMove, GameResult};
 use serde::{Deserialize, Serialize};
 use sqlx::{postgres::PgRow, types::Uuid, FromRow, Row};
+use std::str::FromStr;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Game {
@@ -13,6 +16,26 @@ pub struct Game {
 	pub board: chess::Game,
 	pub moves: Vec<ChessMove>,
 	pub result: Option<GameResult>,
+}
+
+impl Game {
+	pub async fn with_users<'exec, E>(self, conn: E) -> Result<GameWithUsers, sqlx::Error>
+	where
+		E: sqlx::Executor<'exec, Database = sqlx::Postgres> + Copy,
+	{
+		let white_fut = UserWithAccounts::fetch(&self.white_id, conn);
+		let black_fut = UserWithAccounts::fetch(&self.black_id, conn);
+		let (white, black) = white_fut.try_join(black_fut).await?;
+
+		Ok(GameWithUsers {
+			id: self.id,
+			white,
+			black,
+			board: self.board,
+			moves: self.moves,
+			result: self.result,
+		})
+	}
 }
 
 impl<'a> FromRow<'a, PgRow> for Game {
@@ -36,7 +59,20 @@ impl<'a> FromRow<'a, PgRow> for Game {
 			black_id: row.try_get("black_id")?,
 			board: game,
 			moves,
-			result: None,
+			result: row
+				.try_get::<Option<String>, _>("result")?
+				.and_then(|res| GameResult::from_str(&res).ok()),
 		})
 	}
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct GameWithUsers {
+	#[serde(with = "crate::serde::uuid")]
+	pub id: Uuid,
+	pub white: UserWithAccounts,
+	pub black: UserWithAccounts,
+	pub board: chess::Game,
+	pub moves: Vec<ChessMove>,
+	pub result: Option<GameResult>,
 }

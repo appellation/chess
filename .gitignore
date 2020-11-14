@@ -8,5 +8,6 @@
 !/.yarn/cache
 #/.pnp.*
 
+/data
 /target
 .env

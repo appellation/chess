@@ -17,6 +17,8 @@ services:
     env_file: .env
   api:
     env_file: .env
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/postgres
     expose:
       - "8080"
   boards:
@@ -26,3 +28,7 @@ services:
     image: rabbitmq
   redis:
     image: redis
+  postgres:
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: postgres

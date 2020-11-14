@@ -100,6 +100,7 @@ pub async fn create_game(mut req: Request<State>) -> tide::Result {
 }
 
 pub async fn get_game(req: Request<State>) -> tide::Result {
-	let game: &Game = req.ext().unwrap();
-	Ok(tide::Body::from_json(game)?.into())
+	let pool = &req.state().db;
+	let game = req.ext::<Game>().unwrap().clone().with_users(pool).await?;
+	Ok(tide::Body::from_json(&game)?.into())
 }

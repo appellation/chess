@@ -10,3 +10,13 @@ services:
     image: docker.pkg.github.com/appellation/chess/api
   boards:
     image: docker.pkg.github.com/appellation/chess/boards
+  postgres:
+    volumes:
+      - postgres_data:/var/lib/postgresql
+  redis:
+    volumes:
+      - redis_data:/data
+
+volumes:
+  postgres_data:
+  redis_data:

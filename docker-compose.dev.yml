@@ -16,8 +16,6 @@ services:
     build:
       dockerfile: services/api/Dockerfile
       context: .
-    environment:
-      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/postgres
   boards:
     build:
       dockerfile: services/boards/Dockerfile
@@ -28,9 +26,11 @@ services:
     image: rabbitmq:3-management
     ports:
       - 15672:15672
+  redis:
+    volumes:
+      - ./data/redis:/data
   postgres:
-    image: postgres
-    environment:
-      POSTGRES_PASSWORD: postgres
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
     ports:
       - 5432:5432

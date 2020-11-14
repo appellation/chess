@@ -25,11 +25,8 @@ jobs:
 
       - name: Set environment
         run: >
-          DATABASE_URL=$(doctl db get e66951fa-2a87-4022-a526-e2a57a556417 --output json | jq .[0].private_connection.uri -r)
-
           echo "rm -f .env &&
           touch .env &&
-          echo \"DATABASE_URL=$DATABASE_URL\" >> .env &&
           echo \"DISCORD_TOKEN=$DISCORD_TOKEN\" >> .env" | doctl compute ssh 215874001
         env:
           DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}

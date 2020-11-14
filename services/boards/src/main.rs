@@ -1,12 +1,15 @@
 use async_std::task::spawn_blocking;
 use std::convert::TryInto;
-use tide::{Request, Result, http::Mime, Response, StatusCode, Body, Error};
+use tide::{http::Mime, Body, Error, Request, Response, Result, StatusCode};
 
 mod assets;
 mod render;
 
 async fn handle_request(req: Request<()>) -> Result {
-	let board: chess::Board = urlencoding::decode(req.url().path().strip_prefix("/").unwrap_or_default())?.as_str().try_into()?;
+	let board: chess::Board =
+		urlencoding::decode(req.url().path().strip_prefix("/").unwrap_or_default())?
+			.as_str()
+			.try_into()?;
 
 	let accept = req
 		.header("accept")
