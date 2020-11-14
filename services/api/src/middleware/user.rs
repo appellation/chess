@@ -27,14 +27,17 @@ pub fn get_user<'a>(
 
 		let user: User = match account_type {
 			Some(account_type) => {
-				sqlx::query_as!(
-					User,
+				let user = sqlx::query!(
 					"select * from get_or_create_user($1, $2)",
 					account_id,
 					account_type
 				)
 				.fetch_one(&mut conn)
-				.await?
+				.await?;
+
+				User {
+					id: user.id.unwrap(),
+				}
 			}
 			None => {
 				let account_id = account_id.parse::<Uuid>()?;

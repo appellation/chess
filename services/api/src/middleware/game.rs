@@ -2,7 +2,7 @@ use crate::{
 	models::{game::Game, user::User},
 	State,
 };
-use sqlx::{prelude::*, types::Uuid};
+use sqlx::types::Uuid;
 use std::{future::Future, pin::Pin};
 use tide::{Next, Request, Response, Result, StatusCode};
 

@@ -55,6 +55,22 @@ broker.on('MESSAGE_CREATE', async (message: Message, { ack }: AmqpResponseOption
 			console.log(gameId);
 			break;
 		}
+		case 'move': {
+			const res = await fetch(`${apiUrl}/games/current/moves`, {
+				method: 'put',
+				headers: {
+					'x-user-id': message.author.id,
+					'x-account-type': 'Discord',
+				},
+				body: JSON.stringify({
+					san: args.single(),
+				}),
+			});
+
+			const game = await res.json();
+			console.log(game);
+			break;
+		}
 	}
 });
 

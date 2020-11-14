@@ -15,8 +15,8 @@ pub struct Game {
 	pub result: Option<GameResult>,
 }
 
-impl<'a> FromRow<'a, PgRow<'a>> for Game {
-	fn from_row(row: &PgRow<'a>) -> sqlx::Result<Self> {
+impl<'a> FromRow<'a, PgRow> for Game {
+	fn from_row(row: &PgRow) -> sqlx::Result<Self> {
 		let board = row
 			.try_get::<&str, _>("board")?
 			.parse::<Board>()

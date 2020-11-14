@@ -5,7 +5,7 @@ mod routes;
 mod serde;
 mod state;
 
-use sqlx::postgres::PgPool;
+use sqlx::postgres::PgPoolOptions;
 pub use state::State;
 use std::{env, time::Duration};
 
@@ -15,10 +15,10 @@ async fn main() -> tide::Result<()> {
 	dotenv::dotenv()?;
 	tide::log::start();
 
-	let pool = PgPool::builder()
-		.max_size(5)
+	let pool = PgPoolOptions::new()
+		.max_connections(5)
 		.connect_timeout(Duration::new(10, 0))
-		.build(&env::var("DATABASE_URL")?)
+		.connect(&env::var("DATABASE_URL")?)
 		.await?;
 
 	let state = State { db: pool };

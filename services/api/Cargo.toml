@@ -12,9 +12,10 @@ chess = { git = "https://github.com/appellation/chess-1", branch = "feat/serde",
 dotenv = "0.15.0"
 png = "0.16.7"
 rand = "0.7.3"
+refinery = "0.4.0"
 resvg = "0.11.0"
 serde = "1.0.117"
-sqlx = { version = "0.3.5", features = ["postgres", "uuid", "tls"] }
+sqlx = { version = "0.4.1", features = ["postgres", "uuid", "runtime-async-std-rustls"] }
 strum = { version = "0.19", features = ["derive"] }
 tide = "0.14.0"
 usvg = "0.11.0"
