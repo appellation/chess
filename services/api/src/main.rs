@@ -9,6 +9,8 @@ use sqlx::postgres::PgPoolOptions;
 pub use state::State;
 use std::{env, time::Duration};
 
+static MIGRATOR: sqlx::migrate::Migrator = sqlx::migrate!("./migrations");
+
 #[async_std::main]
 async fn main() -> tide::Result<()> {
 	#[cfg(debug_assertions)]
@@ -20,6 +22,8 @@ async fn main() -> tide::Result<()> {
 		.connect_timeout(Duration::new(10, 0))
 		.connect(&env::var("DATABASE_URL")?)
 		.await?;
+
+	MIGRATOR.run(&pool).await?;
 
 	let state = State { db: pool };
 

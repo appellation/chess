@@ -16,9 +16,8 @@ services:
     build:
       dockerfile: services/api/Dockerfile
       context: .
-      args:
-        - DATABASE_URL=postgresql://postgres:postgres@localhost:5432/postgres
-      network: host
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/postgres
   rabbit:
     image: rabbitmq:3-management
     ports:

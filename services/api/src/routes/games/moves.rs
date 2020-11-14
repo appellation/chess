@@ -30,7 +30,7 @@ pub async fn make_move(mut req: Request<State>) -> tide::Result {
 			game.moves.push(chess_move);
 			let result: Option<&str> = game.board.result().map(|r| r.into());
 
-			let mut conn = req.state().db.acquire().await?;
+			let pool = &req.state().db;
 
 			sqlx::query!(
 				"update games set board = $1, moves = array_append(moves, $2), result = $3 where id = $4",
@@ -39,7 +39,7 @@ pub async fn make_move(mut req: Request<State>) -> tide::Result {
 				result,
 				game.id
 			)
-			.execute(&mut conn)
+			.execute(pool)
 			.await?;
 
 			Ok(tide::Body::from_json(&game)?.into())

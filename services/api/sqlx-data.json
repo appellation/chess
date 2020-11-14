@@ -1,0 +1,123 @@
+{
+  "db": "PostgreSQL",
+  "1701a88a7a2d2211f5bc937bbdc97252a67e6df99483d34ae354e1e7c8893b08": {
+    "query": "insert into games (white_id, black_id, board) values ($1, $2, $3) returning id",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid",
+          "Varchar"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
+  "5854f29b125e619dde13819184248af7ba3176bf4e262a18f095dce930391cbf": {
+    "query": "select id from get_or_create_user($1, $2)",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Varchar",
+          "Varchar"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
+  "7609165d94c8f1bea9d535b9b7ad727fd06592973d7f83017292d41acb203be6": {
+    "query": "select * from users where id = $1",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
+  "878a270b9e49c8dd378621c22051442a91f5acebfcd76c06c636e4886d1b6218": {
+    "query": "update games set board = $1, moves = array_append(moves, $2), result = $3 where id = $4",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Varchar",
+          "Text",
+          "Varchar",
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "af7de754a11e867246ad2703aaaa6314b78ad41099524f57b80b3bebedd9c89e": {
+    "query": "select id from games where (white_id = $1 or black_id = $1) and (white_id = $2 or black_id = $2) and result <> null",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
+  "bee2f8002f800306f5c6b1b1b71586257d208a1009ffda6d8561cff4a0daf60e": {
+    "query": "select * from get_or_create_user($1, $2)",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Varchar",
+          "Varchar"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  }
+}

@@ -23,7 +23,7 @@ pub fn get_user<'a>(
 			.ok_or_else(|| Error::from_str(StatusCode::Unauthorized, "missing x-user-id header"))?
 			.as_str();
 
-		let mut conn = req.state().db.acquire().await?;
+		let pool = &req.state().db;
 
 		let user: User = match account_type {
 			Some(account_type) => {
@@ -32,7 +32,7 @@ pub fn get_user<'a>(
 					account_id,
 					account_type
 				)
-				.fetch_one(&mut conn)
+				.fetch_one(pool)
 				.await?;
 
 				User {
@@ -42,7 +42,7 @@ pub fn get_user<'a>(
 			None => {
 				let account_id = account_id.parse::<Uuid>()?;
 				sqlx::query_as!(User, "select * from users where id = $1", account_id)
-					.fetch_one(&mut conn)
+					.fetch_one(pool)
 					.await
 					.map_err(|_| Error::from_str(StatusCode::Unauthorized, "user doesn't exist"))?
 			}

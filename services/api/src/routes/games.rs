@@ -53,7 +53,7 @@ pub async fn create_game(mut req: Request<State>) -> tide::Result {
 	let body: CreateGame = req.body_json().await?;
 	let user = req.ext::<User>().unwrap();
 
-	let mut conn = req.state().db.acquire().await?;
+	let pool = &req.state().db;
 
 	let target_id = match body.account_type {
 		Some(account_type) => {
@@ -63,7 +63,7 @@ pub async fn create_game(mut req: Request<State>) -> tide::Result {
 				body.target_id,
 				account_type
 			)
-			.fetch_one(&mut conn)
+			.fetch_one(pool)
 			.await?
 			.id
 			.unwrap()
@@ -77,7 +77,7 @@ pub async fn create_game(mut req: Request<State>) -> tide::Result {
 	};
 
 	let is_already_playing = sqlx::query!("select id from games where (white_id = $1 or black_id = $1) and (white_id = $2 or black_id = $2) and result <> null", white_id, black_id)
-		.fetch_optional(&mut conn)
+		.fetch_optional(pool)
 		.await?
 		.is_some();
 
@@ -93,7 +93,7 @@ pub async fn create_game(mut req: Request<State>) -> tide::Result {
 		black_id,
 		chess::Board::default().to_string()
 	)
-	.fetch_one(&mut conn)
+	.fetch_one(pool)
 	.await?
 	.id;
 

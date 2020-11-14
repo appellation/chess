@@ -13,7 +13,7 @@ pub fn get_game<'a>(
 	Box::pin(async {
 		let user = req.ext::<User>().unwrap();
 		let game_id = dbg!(req.param("game_id"))?;
-		let mut conn = req.state().db.acquire().await?;
+		let pool = &req.state().db;
 		if game_id == "current" {
 			let mut games = sqlx::query_as::<_, Game>(
 				r#"select *
@@ -24,7 +24,7 @@ where users.id = $1 and games.result is null
 limit 2"#,
 			)
 			.bind(user.id)
-			.fetch_all(&mut conn)
+			.fetch_all(pool)
 			.await?;
 
 			if games.len() == 1 {
@@ -40,7 +40,7 @@ limit 2"#,
 			let game_id = game_id.parse::<Uuid>()?;
 			let maybe_game = sqlx::query_as::<_, Game>("select * from games where id = $1")
 				.bind(game_id)
-				.fetch_optional(&mut conn)
+				.fetch_optional(pool)
 				.await?;
 
 			match maybe_game {
