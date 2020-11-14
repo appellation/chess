@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        service-name: [api, bot, gateway, proxy]
+        service-name: [api, boards, bot, gateway, proxy]
     steps:
       - uses: actions/checkout@v2
 
