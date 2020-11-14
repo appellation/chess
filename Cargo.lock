@@ -98,14 +98,11 @@ dependencies = [
  "async-std",
  "chess",
  "dotenv",
- "png",
  "rand",
- "resvg",
  "serde",
  "sqlx",
  "strum",
  "tide",
- "usvg",
 ]
 
 [[package]]
@@ -404,6 +401,19 @@ dependencies = [
  "fastrand",
  "futures-lite",
  "once_cell",
+]
+
+[[package]]
+name = "boards"
+version = "0.1.0"
+dependencies = [
+ "async-std",
+ "chess",
+ "png",
+ "resvg",
+ "tide",
+ "urlencoding",
+ "usvg",
 ]
 
 [[package]]
@@ -2174,6 +2184,12 @@ dependencies = [
  "percent-encoding",
  "serde",
 ]
+
+[[package]]
+name = "urlencoding"
+version = "1.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c9232eb53352b4442e40d7900465dfc534e8cb2dc8f18656fcb2ac16112b5593"
 
 [[package]]
 name = "usvg"

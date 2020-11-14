@@ -19,6 +19,9 @@ services:
     env_file: .env
     expose:
       - "8080"
+  boards:
+    expose:
+      - "8081"
   rabbit:
     image: rabbitmq
   redis:

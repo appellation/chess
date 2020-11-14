@@ -56,6 +56,7 @@ broker.on('MESSAGE_CREATE', async (message: Message, { ack }: AmqpResponseOption
 			break;
 		}
 		case 'move': {
+			const move = args.single();
 			const res = await fetch(`${apiUrl}/games/current/moves`, {
 				method: 'put',
 				headers: {
@@ -63,12 +64,11 @@ broker.on('MESSAGE_CREATE', async (message: Message, { ack }: AmqpResponseOption
 					'x-account-type': 'Discord',
 				},
 				body: JSON.stringify({
-					san: args.single(),
+					san: move,
 				}),
 			});
 
-			const game = await res.json();
-			console.log(game);
+			if (!res.ok) proxy.post(`/channels/${message.channel_id}/messages`, { content: 'invalid move' }).catch(console.error);
 			break;
 		}
 	}

@@ -1,5 +1,5 @@
 [package]
-name = "api"
+name = "boards"
 version = "0.1.0"
 authors = ["Will Nelson <will@wnelson.xyz>"]
 edition = "2018"
@@ -9,9 +9,8 @@ edition = "2018"
 [dependencies]
 async-std = { version = "1.6.0", features = ["attributes"] }
 chess = { git = "https://github.com/appellation/chess-1", branch = "feat/serde", features = ["serde", "strum"] }
-dotenv = "0.15.0"
-rand = "0.7.3"
-serde = "1.0.117"
-sqlx = { version = "0.4.1", features = ["postgres", "uuid", "runtime-async-std-rustls", "offline"] }
-strum = { version = "0.19", features = ["derive"] }
+png = "0.16.7"
+resvg = "0.11.0"
 tide = "0.14.0"
+urlencoding = "1.1.1"
+usvg = "0.11.0"

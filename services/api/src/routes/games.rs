@@ -9,7 +9,6 @@ use chess::Color;
 use serde::Deserialize;
 use tide::Request;
 
-pub mod board;
 pub mod moves;
 
 #[derive(Debug, Deserialize, Eq, PartialEq)]

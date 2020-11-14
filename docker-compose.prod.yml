@@ -8,3 +8,5 @@ services:
     image: docker.pkg.github.com/appellation/chess/proxy
   api:
     image: docker.pkg.github.com/appellation/chess/api
+  boards:
+    image: docker.pkg.github.com/appellation/chess/boards
