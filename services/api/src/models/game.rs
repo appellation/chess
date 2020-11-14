@@ -1,6 +1,6 @@
 use super::user::UserWithAccounts;
 use async_std::prelude::*;
-use chess::{Board, ChessMove, GameResult};
+use chess::{Board, Color, ChessMove, GameResult};
 use serde::{Deserialize, Serialize};
 use sqlx::{postgres::PgRow, types::Uuid, FromRow, Row};
 use std::str::FromStr;
@@ -14,6 +14,7 @@ pub struct Game {
 	#[serde(with = "crate::serde::uuid")]
 	pub black_id: Uuid,
 	pub board: chess::Game,
+	pub side_to_move: Color,
 	pub moves: Vec<ChessMove>,
 	pub result: Option<GameResult>,
 }
@@ -57,6 +58,7 @@ impl<'a> FromRow<'a, PgRow> for Game {
 			id: row.try_get("id")?,
 			white_id: row.try_get("white_id")?,
 			black_id: row.try_get("black_id")?,
+			side_to_move: game.side_to_move(),
 			board: game,
 			moves,
 			result: row

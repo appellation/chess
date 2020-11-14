@@ -119,5 +119,37 @@
         null
       ]
     }
+  },
+  "eb25a7c21f41f24756e60e91b99fbf7bc0fb3207c801ef9ffc04b9a4bf96af39": {
+    "query": "select * from user_accounts where user_id = $1",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "user_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "account_id",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 2,
+          "name": "account_type",
+          "type_info": "Varchar"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false
+      ]
+    }
   }
 }
