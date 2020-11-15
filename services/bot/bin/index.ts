@@ -71,7 +71,7 @@ broker.on('MESSAGE_CREATE', async (message: Message, { ack }: AmqpResponseOption
 			}
 
 			const game = await res.json();
-			proxy.post(`/channels/${message.channel_id}/messages`, { content: `${boardsUrl}/${game.board}` }).catch(console.error);
+			proxy.post(`/channels/${message.channel_id}/messages`, { content: encodeURI(`${boardsUrl}/${game.board}`) }).catch(console.error);
 
 			break;
 		}
@@ -94,7 +94,7 @@ broker.on('MESSAGE_CREATE', async (message: Message, { ack }: AmqpResponseOption
 			}
 
 			const game = await res.json();
-			proxy.post(`/channels/${message.channel_id}/messages`, { content: `${boardsUrl}/${game.board}` }).catch(console.error);
+			proxy.post(`/channels/${message.channel_id}/messages`, { content: encodeURI(`${boardsUrl}/${game.board}`) }).catch(console.error);
 
 			break;
 		}
