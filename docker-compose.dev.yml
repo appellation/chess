@@ -4,6 +4,9 @@ services:
     build:
       dockerfile: services/bot/Dockerfile
       context: .
+    environment:
+      BOARDS_URL: http://boards.chess.pleb.xyz
+      DISCORD_COMMAND_PREFIX: ','
   gateway:
     build:
       dockerfile: services/gateway/Dockerfile

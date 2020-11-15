@@ -28,6 +28,7 @@ pub async fn make_move(mut req: Request<State>) -> tide::Result {
 				.map_err(|e| tide::Error::from_str(tide::StatusCode::BadRequest, e.to_string()))?;
 			game.board.make_move(chess_move);
 			game.moves.push(chess_move);
+			game.side_to_move = !game.side_to_move;
 			let result: Option<&str> = game.board.result().map(|r| r.into());
 
 			let pool = &req.state().db;

@@ -29,7 +29,7 @@ limit 2"#,
 			.await?;
 
 			if games.len() == 1 {
-				req.set_ext(games.remove(0));
+				req.set_ext::<Game>(games.remove(0).try_into()?);
 				Ok(next.run(req).await)
 			} else {
 				Err(tide::Error::from_str(

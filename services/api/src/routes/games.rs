@@ -77,7 +77,7 @@ pub async fn create_game(mut req: Request<State>) -> tide::Result {
 		Color::White => (user.id, target_id),
 	};
 
-	let is_already_playing = sqlx::query!("select id from games where (white_id = $1 or black_id = $1) and (white_id = $2 or black_id = $2) and result <> null", white_id, black_id)
+	let is_already_playing = sqlx::query!("select id from games where (white_id = $1 or black_id = $1) and (white_id = $2 or black_id = $2) and result is null", white_id, black_id)
 		.fetch_optional(pool)
 		.await?
 		.is_some();
@@ -99,6 +99,7 @@ pub async fn create_game(mut req: Request<State>) -> tide::Result {
 	.await?
 	.try_into()?;
 
+	let game = game.with_users(pool).await?;
 	Ok(tide::Body::from_json(&game)?.into())
 }
 

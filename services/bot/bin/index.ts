@@ -8,6 +8,8 @@ const apiUrl = process.env.API_URL ?? 'http://localhost:8080';
 const boardsUrl = process.env.BOARDS_URL ?? 'http://localhost:8081';
 const amqpUrl = process.env.AMQP_URL ?? 'localhost';
 const token = process.env.DISCORD_TOKEN;
+const prefix = process.env.DISCORD_COMMAND_PREFIX ?? '.';
+
 if (!token) throw new Error('missing DISCORD_TOKEN');
 
 const broker = new Amqp('gateway', {
@@ -18,6 +20,34 @@ const restBroker = new Amqp('rest', {
 });
 const proxy = new Client(restBroker as any, token);
 
+interface UserAccount {
+	user_id: string;
+	account_id: string;
+	account_type: string;
+}
+
+interface User {
+	id: string;
+	accounts: UserAccount[];
+}
+
+interface Game {
+	id: string;
+	white: User;
+	black: User;
+	board: string;
+	side_to_move: 'White' | 'Black';
+	moves: string[];
+	result: string | null;
+}
+
+function respondToGame(message: Message, game: Game) {
+	const userToMove = game[game.side_to_move.toLowerCase() as 'white' | 'black'].accounts.find(account => account.account_type === 'Discord')?.account_id;
+
+	const content = `<@${userToMove}> (${game.side_to_move.toLowerCase()}) to move ${encodeURI(`${boardsUrl}/${game.board}`)}`;
+	proxy.post(`/channels/${message.channel_id}/messages`, { content }).catch(console.error);
+}
+
 broker.on('MESSAGE_CREATE', async (message: Message, { ack }: AmqpResponseOptions) => {
 	ack();
 
@@ -26,7 +56,7 @@ broker.on('MESSAGE_CREATE', async (message: Message, { ack }: AmqpResponseOption
 		['"', '"']
 	]);
 
-	const output = lexer.lexCommand(s => s.startsWith('.') ? 1 : null);
+	const output = lexer.lexCommand(s => s.startsWith(prefix) ? 1 : null);
 	if (!output) return;
 	const [cmd, getTokens] = output;
 
@@ -52,8 +82,13 @@ broker.on('MESSAGE_CREATE', async (message: Message, { ack }: AmqpResponseOption
 				}),
 			});
 
-			const gameId = await res.text();
-			console.log(gameId);
+			if (!res.ok) {
+				proxy.post(`/channels/${message.channel_id}/messages`, { content: 'can\'t create game' }).catch(console.error);
+				return;
+			}
+
+			const game = await res.json();
+			respondToGame(message, game);
 			break;
 		}
 		case 'game': {
@@ -71,7 +106,7 @@ broker.on('MESSAGE_CREATE', async (message: Message, { ack }: AmqpResponseOption
 			}
 
 			const game = await res.json();
-			proxy.post(`/channels/${message.channel_id}/messages`, { content: encodeURI(`${boardsUrl}/${game.board}`) }).catch(console.error);
+			respondToGame(message, game);
 
 			break;
 		}
@@ -94,8 +129,7 @@ broker.on('MESSAGE_CREATE', async (message: Message, { ack }: AmqpResponseOption
 			}
 
 			const game = await res.json();
-			proxy.post(`/channels/${message.channel_id}/messages`, { content: encodeURI(`${boardsUrl}/${game.board}`) }).catch(console.error);
-
+			respondToGame(message, game);
 			break;
 		}
 	}
