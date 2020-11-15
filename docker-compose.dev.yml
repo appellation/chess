@@ -20,8 +20,6 @@ services:
     build:
       dockerfile: services/boards/Dockerfile
       context: .
-    ports:
-      - 8081:8081
   rabbit:
     image: rabbitmq:3-management
     ports:
@@ -34,3 +32,6 @@ services:
       - ./data/postgres:/var/lib/postgresql/data
     ports:
       - 5432:5432
+  nginx:
+    ports:
+      - 8081:80

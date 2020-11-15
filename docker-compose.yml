@@ -32,3 +32,7 @@ services:
     image: postgres
     environment:
       POSTGRES_PASSWORD: postgres
+  nginx:
+    image: nginx
+    volumes:
+      - ./services/nginx:/etc/nginx:ro

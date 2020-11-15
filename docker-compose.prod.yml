@@ -16,6 +16,9 @@ services:
   redis:
     volumes:
       - redis_data:/data
+  nginx:
+    ports:
+      - 80:80
 
 volumes:
   postgres_data:
