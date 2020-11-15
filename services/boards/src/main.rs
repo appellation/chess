@@ -1,6 +1,6 @@
 use async_std::task::spawn_blocking;
 use std::convert::TryInto;
-use tide::{http::Mime, Body, Error, Request, Response, Result, StatusCode};
+use tide::{Error, Request, Response, Result, StatusCode};
 
 mod assets;
 mod render;
