@@ -1,26 +1,5 @@
 {
   "db": "PostgreSQL",
-  "1ec7aabf5d035543ca4e6e24cb275b85c312b6195ac4238e7b730ae16c19d7c3": {
-    "query": "select id from games where (white_id = $1 or black_id = $1) and (white_id = $2 or black_id = $2) and result is null",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id",
-          "type_info": "Uuid"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Uuid"
-        ]
-      },
-      "nullable": [
-        false
-      ]
-    }
-  },
   "521426fad3baed15d33622150d648c13aff8865747029bd8cb81fba1c8fb7455": {
     "query": "select games.id, games.white_id, games.black_id, games.board, games.moves, games.result\nfrom games\nleft join users on users.id = games.black_id\n\tor users.id = games.white_id\nwhere users.id = $1 and games.result is null\nlimit 2",
     "describe": {
@@ -89,6 +68,27 @@
       },
       "nullable": [
         null
+      ]
+    }
+  },
+  "66623063c95601f0a854944bcb324cebe7080dcb43f737146d97f18145c047b2": {
+    "query": "select id from games where (white_id = $1 or black_id = $1 or white_id = $2 or black_id = $2) and result is null",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false
       ]
     }
   },
