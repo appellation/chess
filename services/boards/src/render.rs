@@ -22,7 +22,7 @@ impl TryFrom<Svg> for Vec<u8> {
 	type Error = png::EncodingError;
 
 	fn try_from(value: Svg) -> Result<Self, Self::Error> {
-		let image = resvg::render_node(&value.0, usvg::FitTo::Original, None).unwrap();
+		let image = resvg::render_node(&value.0, usvg::FitTo::Original, Some(usvg::Color::white())).unwrap();
 
 		let mut w = vec![];
 		{
@@ -48,21 +48,17 @@ impl TryFrom<Board> for Svg {
 			let maybe_color = board.color_on(square.clone());
 
 			if let Some((piece, color)) = maybe_piece.zip(maybe_color) {
-				let pos_asset: &[u8] = ColoredPiece(piece, color).into();
-				let mut pos_root = usvg::Tree::from_data(pos_asset, &Default::default())?
-					.root()
-					.last_child()
-					.unwrap();
-				{
-					let path = &mut *pos_root.borrow_mut();
-					match path {
-						usvg::NodeKind::Path(path) => {
-							path.transform.translate(square.x(1152), square.y(1152));
-						}
-						_ => unreachable!(),
-					}
-				}
-				root.append(pos_root);
+				let child_asset: &[u8] = ColoredPiece(piece, color).into();
+				let child_root = usvg::Tree::from_data(child_asset, &Default::default())?.root();
+
+				let group = usvg::Group {
+					transform: usvg::Transform::new_translate(square.x(1152), square.y(1152)),
+					..Default::default()
+				};
+
+				let mut group_node = usvg::Node::new(usvg::NodeKind::Group(group));
+				group_node.append(child_root);
+				root.append(group_node);
 			}
 		}
 
