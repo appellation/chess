@@ -1,5 +1,6 @@
 use crate::{
 	models::{
+		db,
 		game::Game,
 		user::{AccountType, User},
 	},
@@ -7,6 +8,7 @@ use crate::{
 };
 use chess::Color;
 use serde::Deserialize;
+use std::convert::TryInto;
 use tide::Request;
 
 pub mod moves;
@@ -86,17 +88,18 @@ pub async fn create_game(mut req: Request<State>) -> tide::Result {
 		return Ok(res);
 	}
 
-	let id = sqlx::query!(
-		"insert into games (white_id, black_id, board) values ($1, $2, $3) returning id",
+	let game: Game = sqlx::query_as!(
+		db::Game,
+		"insert into games (white_id, black_id, board) values ($1, $2, $3) returning *",
 		white_id,
 		black_id,
 		chess::Board::default().to_string()
 	)
 	.fetch_one(pool)
 	.await?
-	.id;
+	.try_into()?;
 
-	Ok(tide::Body::from_string(id.to_string()).into())
+	Ok(tide::Body::from_json(&game)?.into())
 }
 
 pub async fn get_game(req: Request<State>) -> tide::Result {

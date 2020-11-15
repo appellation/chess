@@ -1,9 +1,9 @@
-use super::user::UserWithAccounts;
+use super::{db, user::UserWithAccounts};
 use async_std::prelude::*;
-use chess::{Board, Color, ChessMove, GameResult};
+use chess::{ChessMove, Color, GameResult};
 use serde::{Deserialize, Serialize};
-use sqlx::{postgres::PgRow, types::Uuid, FromRow, Row};
-use std::str::FromStr;
+use sqlx::types::Uuid;
+use std::convert::TryFrom;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Game {
@@ -17,6 +17,27 @@ pub struct Game {
 	pub side_to_move: Color,
 	pub moves: Vec<ChessMove>,
 	pub result: Option<GameResult>,
+}
+
+impl TryFrom<db::Game> for Game {
+	type Error = chess::Error;
+
+	fn try_from(game: db::Game) -> Result<Self, Self::Error> {
+		let board: chess::Game = game.board.parse()?;
+		Ok(Self {
+			id: game.id,
+			white_id: game.white_id,
+			black_id: game.black_id,
+			side_to_move: board.side_to_move(),
+			board,
+			moves: game
+				.moves
+				.into_iter()
+				.map(|m| m.parse())
+				.collect::<Result<_, _>>()?,
+			result: game.result.and_then(|res| res.parse().ok()),
+		})
+	}
 }
 
 impl Game {
@@ -33,37 +54,9 @@ impl Game {
 			white,
 			black,
 			board: self.board,
+			side_to_move: self.side_to_move,
 			moves: self.moves,
 			result: self.result,
-		})
-	}
-}
-
-impl<'a> FromRow<'a, PgRow> for Game {
-	fn from_row(row: &PgRow) -> sqlx::Result<Self> {
-		let board = row
-			.try_get::<&str, _>("board")?
-			.parse::<Board>()
-			.map_err(|e| sqlx::Error::Decode(Box::new(e)))?;
-		let game = chess::Game::new_with_board(board);
-
-		let moves = row
-			.try_get::<Vec<String>, _>("moves")?
-			.iter()
-			.map(|move_text| ChessMove::from_san(&board, move_text))
-			.collect::<Result<_, _>>()
-			.map_err(|e| sqlx::Error::Decode(Box::new(e)))?;
-
-		Ok(Self {
-			id: row.try_get("id")?,
-			white_id: row.try_get("white_id")?,
-			black_id: row.try_get("black_id")?,
-			side_to_move: game.side_to_move(),
-			board: game,
-			moves,
-			result: row
-				.try_get::<Option<String>, _>("result")?
-				.and_then(|res| GameResult::from_str(&res).ok()),
 		})
 	}
 }
@@ -75,6 +68,7 @@ pub struct GameWithUsers {
 	pub white: UserWithAccounts,
 	pub black: UserWithAccounts,
 	pub board: chess::Game,
+	pub side_to_move: Color,
 	pub moves: Vec<ChessMove>,
 	pub result: Option<GameResult>,
 }

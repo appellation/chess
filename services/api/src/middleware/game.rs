@@ -1,9 +1,9 @@
 use crate::{
-	models::{game::Game, user::User},
+	models::{db, game::Game, user::User},
 	State,
 };
 use sqlx::types::Uuid;
-use std::{future::Future, pin::Pin};
+use std::{convert::TryInto, future::Future, pin::Pin};
 use tide::{Next, Request, Response, Result, StatusCode};
 
 pub fn get_game<'a>(
@@ -15,15 +15,16 @@ pub fn get_game<'a>(
 		let game_id = dbg!(req.param("game_id"))?;
 		let pool = &req.state().db;
 		if game_id == "current" {
-			let mut games = sqlx::query_as::<_, Game>(
-				r#"select *
+			let mut games = sqlx::query_as!(
+				db::Game,
+				r#"select games.id, games.white_id, games.black_id, games.board, games.moves, games.result
 from games
 left join users on users.id = games.black_id
 	or users.id = games.white_id
 where users.id = $1 and games.result is null
 limit 2"#,
+				user.id
 			)
-			.bind(user.id)
 			.fetch_all(pool)
 			.await?;
 
@@ -38,14 +39,14 @@ limit 2"#,
 			}
 		} else {
 			let game_id = game_id.parse::<Uuid>()?;
-			let maybe_game = sqlx::query_as::<_, Game>("select * from games where id = $1")
-				.bind(game_id)
-				.fetch_optional(pool)
-				.await?;
+			let maybe_game =
+				sqlx::query_as!(db::Game, "select * from games where id = $1", game_id)
+					.fetch_optional(pool)
+					.await?;
 
 			match maybe_game {
 				Some(game) => {
-					req.set_ext(game);
+					req.set_ext::<Game>(game.try_into()?);
 					Ok(next.run(req).await)
 				}
 				None => Ok(Response::new(StatusCode::NotFound)),
