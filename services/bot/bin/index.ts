@@ -43,8 +43,30 @@ interface Game {
 
 function respondToGame(message: Message, game: Game) {
 	const userToMove = game[game.side_to_move.toLowerCase() as 'white' | 'black'].accounts.find(account => account.account_type === 'Discord')?.account_id;
+	const sideToMove = game.side_to_move.toLowerCase();
 
-	const content = `<@${userToMove}> (${game.side_to_move.toLowerCase()}) to move ${encodeURI(`${boardsUrl}/${game.board}`)}`;
+	let content: string;
+	switch (game.result) {
+		case 'WhiteCheckmates':
+		case 'BlackCheckmates':
+		case 'WhiteResigns':
+		case 'BlackResigns':
+			content = `<@${userToMove}> (${sideToMove}) wins!`;
+			break;
+		case 'Stalemate':
+			content = 'Stalemate!';
+			break;
+		case 'DrawAccepted':
+			content = 'Draw accepted.';
+			break;
+		case 'DrawDeclared':
+			content = 'Draw declared.';
+			break;
+		default:
+			content = `<@${userToMove}> (${sideToMove}) to move ${encodeURI(`${boardsUrl}/${game.board}`)}`;
+			break;
+	}
+
 	proxy.post(`/channels/${message.channel_id}/messages`, { content }).catch(console.error);
 }
 
