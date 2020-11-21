@@ -1,5 +1,5 @@
 use crate::assets;
-use chess::{Board, Color, Piece, Square, ALL_SQUARES};
+use chess::{Board, Color, Piece, Square};
 use std::convert::TryFrom;
 
 const WHITE_CHESS_KING: char = '\u{2654}';
@@ -43,23 +43,22 @@ impl TryFrom<Board> for Svg {
 	fn try_from(board: chess::Board) -> Result<Self, Self::Error> {
 		let mut root = usvg::Tree::from_data(assets::BASE_BOARD, &Default::default())?.root();
 
-		for square in ALL_SQUARES.iter() {
-			let maybe_piece = board.piece_on(square.clone());
-			let maybe_color = board.color_on(square.clone());
+		for square in board.combined().into_iter() {
+			// safe to unwrap since the iterator is over valid squares
+			let piece = board.piece_on(square).unwrap();
+			let color = board.color_on(square).unwrap();
 
-			if let Some((piece, color)) = maybe_piece.zip(maybe_color) {
-				let child_asset: &[u8] = ColoredPiece(piece, color).into();
-				let child_root = usvg::Tree::from_data(child_asset, &Default::default())?.root();
+			let child_asset: &[u8] = ColoredPiece(piece, color).into();
+			let child_root = usvg::Tree::from_data(child_asset, &Default::default())?.root();
 
-				let group = usvg::Group {
-					transform: usvg::Transform::new_translate(square.x(1152), square.y(1152)),
-					..Default::default()
-				};
+			let group = usvg::Group {
+				transform: usvg::Transform::new_translate(square.x(1152), square.y(1152)),
+				..Default::default()
+			};
 
-				let mut group_node = usvg::Node::new(usvg::NodeKind::Group(group));
-				group_node.append(child_root);
-				root.append(group_node);
-			}
+			let mut group_node = usvg::Node::new(usvg::NodeKind::Group(group));
+			group_node.append(child_root);
+			root.append(group_node);
 		}
 
 		Ok(Self(root))
