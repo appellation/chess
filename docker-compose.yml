@@ -36,3 +36,5 @@ services:
     image: nginx
     volumes:
       - ./services/nginx:/etc/nginx:ro
+    depends_on:
+      - boards
