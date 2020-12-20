@@ -45,13 +45,18 @@ function respondToGame(message: Message, game: Game) {
 	const userToMove = game[game.side_to_move.toLowerCase() as 'white' | 'black'].accounts.find(account => account.account_type === 'Discord')?.account_id;
 	const sideToMove = game.side_to_move.toLowerCase();
 
+	let winnerId: string | undefined;
 	let content: string;
 	switch (game.result) {
-		case 'WhiteCheckmates':
 		case 'BlackCheckmates':
 		case 'WhiteResigns':
+			winnerId = game.black.accounts.find(account => account.account_type === 'Discord')?.account_id;
+			content = `<@${winnerId}> (black) wins!`;
+			break;
+		case 'WhiteCheckmates':
 		case 'BlackResigns':
-			content = `<@${userToMove}> (${sideToMove}) wins!`;
+			winnerId = game.white.accounts.find(account => account.account_type === 'Discord')?.account_id;
+			content = `<@${winnerId}> (white) wins!`;
 			break;
 		case 'Stalemate':
 			content = 'Stalemate!';
@@ -141,7 +146,29 @@ broker.on('MESSAGE_CREATE', async (message: Message, { ack }: AmqpResponseOption
 					'x-account-type': 'Discord',
 				},
 				body: JSON.stringify({
-					san: move,
+					action: 'MakeMove',
+					data: move,
+				}),
+			});
+
+			if (!res.ok) {
+				proxy.post(`/channels/${message.channel_id}/messages`, { content: 'invalid move' }).catch(console.error);
+				return;
+			}
+
+			const game = await res.json();
+			respondToGame(message, game);
+			break;
+		}
+		case 'resign': {
+			const res = await fetch(`${apiUrl}/games/current/moves`, {
+				method: 'put',
+				headers: {
+					'x-user-id': message.author.id,
+					'x-account-type': 'Discord',
+				},
+				body: JSON.stringify({
+					action: 'Resign',
 				}),
 			});
 

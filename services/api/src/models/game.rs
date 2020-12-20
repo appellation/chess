@@ -1,4 +1,4 @@
-use super::{db, user::UserWithAccounts};
+use super::{db, user::{User, UserWithAccounts}};
 use async_std::prelude::*;
 use chess::{ChessMove, Color, GameResult};
 use serde::{Deserialize, Serialize};
@@ -41,6 +41,22 @@ impl TryFrom<db::Game> for Game {
 }
 
 impl Game {
+	pub fn color_of(&self, user: &User) -> Option<Color> {
+		if user.id == self.black_id {
+			Some(Color::Black)
+		} else if user.id == self.white_id {
+			Some(Color::White)
+		} else {
+			None
+		}
+	}
+
+	pub fn reload(&mut self) -> &Self {
+		self.side_to_move = self.board.side_to_move();
+		self.result = self.board.result();
+		self
+	}
+
 	pub async fn with_users<'exec, E>(self, conn: E) -> Result<GameWithUsers, sqlx::Error>
 	where
 		E: sqlx::Executor<'exec, Database = sqlx::Postgres> + Copy,

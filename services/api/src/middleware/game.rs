@@ -12,7 +12,7 @@ pub fn get_game<'a>(
 ) -> Pin<Box<dyn Future<Output = Result> + Send + 'a>> {
 	Box::pin(async {
 		let user = req.ext::<User>().unwrap();
-		let game_id = dbg!(req.param("game_id"))?;
+		let game_id = req.param("game_id")?;
 		let pool = &req.state().db;
 		if game_id == "current" {
 			let mut games = sqlx::query_as!(

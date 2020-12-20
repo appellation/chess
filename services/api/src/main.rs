@@ -27,6 +27,7 @@ async fn main() -> tide::Result<()> {
 	let state = State { db: pool };
 
 	let mut app = tide::with_state(state);
+
 	app.at("/games")
 		.with(middleware::user::get_user)
 		.post(routes::games::create_game);
@@ -37,7 +38,9 @@ async fn main() -> tide::Result<()> {
 	app.at("/games/:game_id/moves")
 		.with(middleware::user::get_user)
 		.with(middleware::game::get_game)
+		.with(middleware::color::get_user_color)
 		.put(routes::games::moves::make_move);
+
 	app.listen("0.0.0.0:8080").await?;
 	Ok(())
 }

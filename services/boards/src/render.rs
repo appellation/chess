@@ -22,7 +22,8 @@ impl TryFrom<Svg> for Vec<u8> {
 	type Error = png::EncodingError;
 
 	fn try_from(value: Svg) -> Result<Self, Self::Error> {
-		let image = resvg::render_node(&value.0, usvg::FitTo::Original, Some(usvg::Color::white())).unwrap();
+		let image = resvg::render_node(&value.0, usvg::FitTo::Original, Some(usvg::Color::white()))
+			.unwrap();
 
 		let mut w = vec![];
 		{

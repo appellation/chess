@@ -1,5 +1,32 @@
 {
   "db": "PostgreSQL",
+  "07a54ab583b22e7efd76ac48772c06230bf5165c50a8de7e566b4f845733dcca": {
+    "query": "update games set board = $1, result = $2 where id = $3",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Varchar",
+          "Varchar",
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "3d923a3c377945bf7c437fc4214cabafc4277fee241ac5c0f965ff1e45c6a4d9": {
+    "query": "update games set moves = array_append(moves, $1) where id = $2",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "521426fad3baed15d33622150d648c13aff8865747029bd8cb81fba1c8fb7455": {
     "query": "select games.id, games.white_id, games.black_id, games.board, games.moves, games.result\nfrom games\nleft join users on users.id = games.black_id\n\tor users.id = games.white_id\nwhere users.id = $1 and games.result is null\nlimit 2",
     "describe": {
@@ -110,21 +137,6 @@
       "nullable": [
         false
       ]
-    }
-  },
-  "878a270b9e49c8dd378621c22051442a91f5acebfcd76c06c636e4886d1b6218": {
-    "query": "update games set board = $1, moves = array_append(moves, $2), result = $3 where id = $4",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Varchar",
-          "Text",
-          "Varchar",
-          "Uuid"
-        ]
-      },
-      "nullable": []
     }
   },
   "9c0eb15c2d9fe8aafc15e5a7bd848a8d3c6a666eacced69dc1c2ef626c1bb6b2": {
