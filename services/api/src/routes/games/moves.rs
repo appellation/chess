@@ -6,7 +6,7 @@ use tide::{Request, StatusCode};
 #[derive(Debug, Deserialize, Eq, PartialEq)]
 #[serde(tag = "action", content = "data")]
 enum MoveRequest {
-	MakeMove(ChessMove),
+	MakeMove(String),
 	AcceptDraw,
 	OfferDraw,
 	DeclareDraw,
@@ -24,7 +24,8 @@ pub async fn make_move(mut req: Request<State>) -> tide::Result {
 	let mut txn = pool.begin().await?;
 
 	match move_request {
-		MoveRequest::MakeMove(m) if is_users_turn => {
+		MoveRequest::MakeMove(san) if is_users_turn => {
+			let m = ChessMove::from_san(&game.board.current_position(), &san)?;
 			game.board.make_move(m);
 			game.moves.push(m);
 			sqlx::query!(
