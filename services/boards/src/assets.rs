@@ -1,4 +1,4 @@
-pub const BASE_BOARD: &'static [u8; 65111] = include_bytes!("./assets/chess-01.svg");
+pub const BASE_BOARD: &'static [u8; 59349] = include_bytes!("./assets/chess-01.svg");
 
 pub const WHITE_ROOK: &'static [u8; 1262] = include_bytes!("./assets/chess-02.svg");
 pub const WHITE_KNIGHT: &'static [u8; 5495] = include_bytes!("./assets/chess-03.svg");

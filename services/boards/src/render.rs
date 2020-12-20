@@ -16,6 +16,8 @@ const BLACK_CHESS_BISHOP: char = '\u{265D}';
 const BLACK_CHESS_KNIGHT: char = '\u{265E}';
 const BLACK_CHESS_PAWN: char = '\u{265F}';
 
+const ICON_SIZE: usize = 144;
+
 pub struct Svg(usvg::Node);
 
 impl TryFrom<Svg> for Vec<u8> {
@@ -73,11 +75,11 @@ trait Positioned {
 
 impl Positioned for Square {
 	fn x(&self, size: usize) -> f64 {
-		return (self.get_file().to_index() as f64 / 8.0) * size as f64;
+		self.get_file().to_index() as f64 / 8.0 * size as f64
 	}
 
 	fn y(&self, size: usize) -> f64 {
-		return (self.get_rank().to_index() as f64 / 8.0) * size as f64;
+		(size as f64 / 8.0 * (8 - self.get_rank().to_index()) as f64) - ICON_SIZE as f64
 	}
 }
 
