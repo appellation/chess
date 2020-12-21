@@ -37,6 +37,27 @@ limit 2"#,
 					"multiple games in progress",
 				))
 			}
+		} else if game_id == "previous" {
+			let maybe_game = sqlx::query_as!(
+				db::Game,
+				r#"select games.id, games.white_id, games.black_id, games.board, games.moves, games.result
+from games
+left join users on users.id = games.black_id
+	or users.id = games.white_id
+where users.id = $1
+limit 1"#,
+				user.id
+			)
+			.fetch_optional(pool)
+			.await?;
+
+			match maybe_game {
+				Some(game) => {
+					req.set_ext::<Game>(game.try_into()?);
+					Ok(next.run(req).await)
+				}
+				None => Ok(Response::new(StatusCode::NotFound)),
+			}
 		} else {
 			let game_id = game_id.parse::<Uuid>()?;
 			let maybe_game =

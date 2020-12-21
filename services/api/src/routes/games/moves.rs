@@ -1,4 +1,4 @@
-use crate::{State, models::game::Game};
+use crate::{models::{game::Game, r#move::SANChessMove}, State};
 use chess::{ChessMove, Color};
 use serde::Deserialize;
 use tide::{Request, StatusCode};
@@ -25,12 +25,16 @@ pub async fn make_move(mut req: Request<State>) -> tide::Result {
 
 	match move_request {
 		MoveRequest::MakeMove(san) if is_users_turn => {
-			let m = ChessMove::from_san(&game.board.current_position(), &san)?;
-			game.board.make_move(m);
-			game.moves.push(m);
+			let board_move = ChessMove::from_san(&game.board.current_position(), &san)?;
+			let san_move = san.parse::<SANChessMove>()?;
+			let san_move_str = san_move.to_string();
+
+			game.board.make_move(board_move);
+			game.moves.push(san_move);
+
 			sqlx::query!(
 				"update games set moves = array_append(moves, $1) where id = $2",
-				m.to_string(),
+				san_move_str,
 				game.id
 			)
 			.execute(&mut txn)
@@ -39,7 +43,7 @@ pub async fn make_move(mut req: Request<State>) -> tide::Result {
 		MoveRequest::AcceptDraw if is_users_turn => {
 			game.board.accept_draw();
 		}
-		MoveRequest::OfferDraw if is_users_turn => {
+		MoveRequest::OfferDraw => {
 			game.board.offer_draw(user_color);
 		}
 		MoveRequest::DeclareDraw => {
@@ -48,7 +52,7 @@ pub async fn make_move(mut req: Request<State>) -> tide::Result {
 		MoveRequest::Resign => {
 			game.board.resign(user_color);
 		}
-		_ => return Ok(tide::Error::from_str(StatusCode::BadRequest, "Not your turn").into())
+		_ => return Ok(tide::Error::from_str(StatusCode::BadRequest, "Not your turn").into()),
 	}
 
 	game.reload();
