@@ -1,6 +1,6 @@
 # token = ""
-events = ["MESSAGE_CREATE"]
-intents = ["GUILD_MESSAGES"]
+events = ["INTERACTION_CREATE"]
+intents = []
 
 [broker]
 type = "amqp"

@@ -1,14 +1,12 @@
 import { Amqp, AmqpResponseOptions } from '@spectacles/brokers';
 import Client from '@spectacles/proxy';
-import { Message } from '@spectacles/types';
-import { Lexer, Parser, Args } from 'lexure';
+import { User as DiscordUser, Interaction, InteractionType } from '@spectacles/types';
 import fetch from 'node-fetch';
 
 const apiUrl = process.env.API_URL ?? 'http://localhost:8080';
 const boardsUrl = process.env.BOARDS_URL ?? 'http://localhost:8081';
 const amqpUrl = process.env.AMQP_URL ?? 'localhost';
 const token = process.env.DISCORD_TOKEN;
-const prefix = process.env.DISCORD_COMMAND_PREFIX ?? '.';
 
 if (!token) throw new Error('missing DISCORD_TOKEN');
 
@@ -41,7 +39,7 @@ interface Game {
 	result: string | null;
 }
 
-function respondToGame(message: Message, game: Game) {
+function respondToGame(interaction: Interaction, game: Game) {
 	const userToMove = game[game.side_to_move.toLowerCase() as 'white' | 'black'].accounts.find(account => account.account_type === 'Discord')?.account_id;
 	const sideToMove = game.side_to_move.toLowerCase();
 
@@ -72,133 +70,131 @@ function respondToGame(message: Message, game: Game) {
 			break;
 	}
 
-	proxy.post(`/channels/${message.channel_id}/messages`, { content }).catch(console.error);
+	respond(interaction, content);
 }
 
-broker.on('MESSAGE_CREATE', async (message: Message, { ack }: AmqpResponseOptions) => {
+function respond(interaction: Interaction, content: string) {
+	proxy.post(`/interactions/${interaction.id}/${interaction.token}/callback`, { type: 4, data: { content, allowed_mentions: { parse: ['users'] } } }).catch(console.error);
+}
+
+broker.on('INTERACTION_CREATE', async (interaction: Interaction, { ack }: AmqpResponseOptions) => {
 	ack();
 
-	const lexer = new Lexer(message.content);
-	lexer.setQuotes([
-		['"', '"']
-	]);
+	console.log(require('util').inspect(interaction, { depth: Infinity }));
 
-	const output = lexer.lexCommand(s => s.startsWith(prefix) ? 1 : null);
-	if (!output) return;
-	const [cmd, getTokens] = output;
-
-	const parser = new Parser(getTokens());
-	const args = new Args(parser.parse());
-
-	console.log(cmd, args);
-	switch (cmd.value) {
-		case 'ping': {
-			proxy.post(`/channels/${message.channel_id}/messages`, { content: 'pong' }).catch(console.error);
+	switch (interaction.type) {
+		case InteractionType.PING:
+			proxy.post(`/interactions/${interaction.id}/${interaction.token}/callback`, { type: 1 }).catch(console.error);
 			break;
-		}
-		case 'challenge': {
-			const res = await fetch(`${apiUrl}/games`, {
-				method: 'post',
-				headers: {
-					'x-user-id': message.author.id,
-					'x-account-type': 'Discord',
-				},
-				body: JSON.stringify({
-					target_id: args.single(),
-					account_type: 'Discord',
-				}),
-			});
+		case InteractionType.APPLICATION_COMMAND:
+			switch (interaction.data?.name) {
+				case 'ping': {
+					respond(interaction, 'pong');
+					break;
+				}
+				case 'challenge': {
+					const res = await fetch(`${apiUrl}/games`, {
+						method: 'post',
+						headers: {
+							'x-user-id': interaction.member.user.id,
+							'x-account-type': 'Discord',
+						},
+						body: JSON.stringify({
+							target_id: interaction.data?.options[0].value,
+							account_type: 'Discord',
+						}),
+					});
 
-			if (!res.ok) {
-				proxy.post(`/channels/${message.channel_id}/messages`, { content: 'can\'t create game' }).catch(console.error);
-				return;
+					if (!res.ok) {
+						respond(interaction, 'can\'t create game');
+						return;
+					}
+
+					const game = await res.json();
+					respondToGame(interaction, game);
+					break;
+				}
+				case 'game': {
+					const res = await fetch(`${apiUrl}/games/current`, {
+						method: 'get',
+						headers: {
+							'x-user-id': interaction.member.user.id,
+							'x-account-type': 'Discord',
+						},
+					});
+
+					if (!res.ok) {
+						respond(interaction, 'no game');
+						return;
+					}
+
+					const game = await res.json();
+					respondToGame(interaction, game);
+
+					break;
+				}
+				case 'move': {
+					const res = await fetch(`${apiUrl}/games/current/moves`, {
+						method: 'put',
+						headers: {
+							'x-user-id': interaction.member.user.id,
+							'x-account-type': 'Discord',
+						},
+						body: JSON.stringify({
+							action: 'MakeMove',
+							data: interaction.data?.options[0].value,
+						}),
+					});
+
+					if (!res.ok) {
+						respond(interaction, 'invalid move');
+						return;
+					}
+
+					const game = await res.json();
+					respondToGame(interaction, game);
+					break;
+				}
+				case 'resign': {
+					const res = await fetch(`${apiUrl}/games/current/moves`, {
+						method: 'put',
+						headers: {
+							'x-user-id': interaction.member.user.id,
+							'x-account-type': 'Discord',
+						},
+						body: JSON.stringify({
+							action: 'Resign',
+						}),
+					});
+
+					if (!res.ok) {
+						respond(interaction, 'invalid move');
+						return;
+					}
+
+					const game = await res.json();
+					respondToGame(interaction, game);
+					break;
+				}
+				case 'pgn': {
+					const res = await fetch(`${apiUrl}/games/previous`, {
+						method: 'get',
+						headers: {
+							'x-user-id': interaction.member.user.id,
+							'x-account-type': 'Discord',
+						},
+					});
+
+					if (!res.ok) {
+						respond(interaction, 'unable to get last game');
+						return;
+					}
+
+					const game = await res.json();
+					respond(interaction, `\`\`\`\n${game.pgn}\n\`\`\``);
+					break;
+				}
 			}
-
-			const game = await res.json();
-			respondToGame(message, game);
-			break;
-		}
-		case 'game': {
-			const res = await fetch(`${apiUrl}/games/current`, {
-				method: 'get',
-				headers: {
-					'x-user-id': message.author.id,
-					'x-account-type': 'Discord',
-				},
-			});
-
-			if (!res.ok) {
-				proxy.post(`/channels/${message.channel_id}/messages`, { content: 'no game' }).catch(console.error);
-				return;
-			}
-
-			const game = await res.json();
-			respondToGame(message, game);
-
-			break;
-		}
-		case 'move': {
-			const move = args.single();
-			const res = await fetch(`${apiUrl}/games/current/moves`, {
-				method: 'put',
-				headers: {
-					'x-user-id': message.author.id,
-					'x-account-type': 'Discord',
-				},
-				body: JSON.stringify({
-					action: 'MakeMove',
-					data: move,
-				}),
-			});
-
-			if (!res.ok) {
-				proxy.post(`/channels/${message.channel_id}/messages`, { content: 'invalid move' }).catch(console.error);
-				return;
-			}
-
-			const game = await res.json();
-			respondToGame(message, game);
-			break;
-		}
-		case 'resign': {
-			const res = await fetch(`${apiUrl}/games/current/moves`, {
-				method: 'put',
-				headers: {
-					'x-user-id': message.author.id,
-					'x-account-type': 'Discord',
-				},
-				body: JSON.stringify({
-					action: 'Resign',
-				}),
-			});
-
-			if (!res.ok) {
-				proxy.post(`/channels/${message.channel_id}/messages`, { content: 'invalid move' }).catch(console.error);
-				return;
-			}
-
-			const game = await res.json();
-			respondToGame(message, game);
-			break;
-		}
-		case 'pgn': {
-			const res = await fetch(`${apiUrl}/games/previous`, {
-				method: 'get',
-				headers: {
-					'x-user-id': message.author.id,
-					'x-account-type': 'Discord',
-				},
-			});
-
-			if (!res.ok) {
-				proxy.post(`/channels/${message.channel_id}/messages`, { content: 'unable to get last game' }).catch(console.error);
-				return;
-			}
-
-			const game = await res.json();
-			proxy.post(`/channels/${message.channel_id}/messages`, { content: `\`\`\`\n${game.pgn}\n\`\`\`` }).catch(console.error);
-			break;
-		}
 	}
 });
 
@@ -208,7 +204,7 @@ broker.on('close', console.log);
 	try {
 		console.log('connecting....');
 		const connection = await broker.connect(amqpUrl);
-		broker.subscribe('MESSAGE_CREATE');
+		broker.subscribe('INTERACTION_CREATE');
 		await restBroker.connect(connection);
 		console.log('ready');
 	} catch (e) {

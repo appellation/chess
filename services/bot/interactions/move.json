@@ -5,7 +5,8 @@
 		{
 			"name": "notation",
 			"description": "Standard Algebraic Notation for current move",
-			"type": 3
+			"type": 3,
+			"required": true
 		}
 	]
 }

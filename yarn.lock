@@ -48,10 +48,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@spectacles/types@npm:^0.2.1":
-  version: 0.2.1
-  resolution: "@spectacles/types@npm:0.2.1"
-  checksum: be813ea9e7436d109b89be702ebeeae44e99b258deededed69690d56499cc73ed140de7466c20d677f6fc64066b2b39274938b3630c9377996f962297b9d1361
+"@spectacles/types@npm:0.2.3":
+  version: 0.2.3
+  resolution: "@spectacles/types@npm:0.2.3"
+  checksum: 2855eeaae2b06df5a07a40f3273ea2df372246eaca18303fb32dddb1f321adae6641bba9ccefed910b221ac1c4bdfa86d8b8cd3d40922a6d7de5de0a30c9c887
   languageName: node
   linkType: hard
 
@@ -140,12 +140,11 @@ __metadata:
   dependencies:
     "@spectacles/brokers": latest
     "@spectacles/proxy": ^0.1.1
-    "@spectacles/types": ^0.2.1
+    "@spectacles/types": 0.2.3
     "@types/ioredis": ^4.17.7
     "@types/node": ^14.14.6
     "@types/node-fetch": ^2.5.7
     env-cmd: ^10.1.0
-    lexure: ^0.17.0
     node-fetch: ^2.6.1
     rimraf: ^3.0.2
     typescript: ^4.0.5
@@ -350,13 +349,6 @@ __metadata:
   version: 2.0.0
   resolution: "isexe@npm:2.0.0"
   checksum: 7b437980bb77881a146fba85cfbdf01edc2b148673e9c2722a1e49661fea73adf524430a80fdbfb8ce9f60d43224e682c657c45030482bd39e0c488fc29b4afe
-  languageName: node
-  linkType: hard
-
-"lexure@npm:^0.17.0":
-  version: 0.17.0
-  resolution: "lexure@npm:0.17.0"
-  checksum: 72859972e93e012db0fde49415a628cb632fb0b3225054f66d2a318681cfc7e06cea91d35d65afc87e539f4c53da09fa6a1f0d0f701d805769c7ea910d298f6d
   languageName: node
   linkType: hard
 

@@ -94,10 +94,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         }]
       ]],
       ["@spectacles/types", [
-        ["npm:0.2.1", {
-          "packageLocation": "./.yarn/cache/@spectacles-types-npm-0.2.1-5148be0e33-be813ea9e7.zip/node_modules/@spectacles/types/",
+        ["npm:0.2.3", {
+          "packageLocation": "./.yarn/cache/@spectacles-types-npm-0.2.3-da23b0abd6-2855eeaae2.zip/node_modules/@spectacles/types/",
           "packageDependencies": [
-            ["@spectacles/types", "npm:0.2.1"]
+            ["@spectacles/types", "npm:0.2.3"]
           ],
           "linkType": "HARD",
         }]
@@ -202,12 +202,11 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["bot", "workspace:services/bot"],
             ["@spectacles/brokers", "npm:0.8.4"],
             ["@spectacles/proxy", "npm:0.1.1"],
-            ["@spectacles/types", "npm:0.2.1"],
+            ["@spectacles/types", "npm:0.2.3"],
             ["@types/ioredis", "npm:4.17.7"],
             ["@types/node", "npm:14.14.6"],
             ["@types/node-fetch", "npm:2.5.7"],
             ["env-cmd", "npm:10.1.0"],
-            ["lexure", "npm:0.17.0"],
             ["node-fetch", "npm:2.6.1"],
             ["rimraf", "npm:3.0.2"],
             ["typescript", "patch:typescript@npm%3A4.0.5#builtin<compat/typescript>::version=4.0.5&hash=5bf698"]
@@ -447,15 +446,6 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/isexe-npm-2.0.0-b58870bd2e-7b437980bb.zip/node_modules/isexe/",
           "packageDependencies": [
             ["isexe", "npm:2.0.0"]
-          ],
-          "linkType": "HARD",
-        }]
-      ]],
-      ["lexure", [
-        ["npm:0.17.0", {
-          "packageLocation": "./.yarn/cache/lexure-npm-0.17.0-5efabcc083-72859972e9.zip/node_modules/lexure/",
-          "packageDependencies": [
-            ["lexure", "npm:0.17.0"]
           ],
           "linkType": "HARD",
         }]
