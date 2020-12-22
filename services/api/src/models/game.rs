@@ -1,6 +1,6 @@
 use super::{
 	db,
-	r#move::{SANChessMove, EndOfGameState},
+	r#move::EndOfGameState,
 	user::{User, UserWithAccounts},
 };
 use async_std::prelude::*;
@@ -23,7 +23,7 @@ pub struct Game {
 	pub black_id: Uuid,
 	pub board: chess::Game,
 	pub side_to_move: Color,
-	pub moves: Vec<SANChessMove>,
+	pub moves: Vec<String>,
 	pub result: Option<GameResult>,
 	pub pgn: Pgn,
 }
@@ -37,8 +37,8 @@ impl Display for Pgn {
 	}
 }
 
-impl<'game, 'moves> From<(&'game chess::Game, &'moves [SANChessMove])> for Pgn {
-	fn from(value: (&'game chess::Game, &'moves [SANChessMove])) -> Self {
+impl<'game, 'moves> From<(&'game chess::Game, &'moves [String])> for Pgn {
+	fn from(value: (&'game chess::Game, &'moves [String])) -> Self {
 		let mut pgn = value
 			.1
 			.chunks(2)
@@ -47,11 +47,7 @@ impl<'game, 'moves> From<(&'game chess::Game, &'moves [SANChessMove])> for Pgn {
 				format!(
 					"{}. {}",
 					i + 1,
-					moves
-						.iter()
-						.map(|mv| mv.to_string())
-						.intersperse(" ".to_owned())
-						.collect::<String>()
+					moves.join(" ")
 				)
 			})
 			.intersperse(" ".to_owned())
@@ -66,13 +62,7 @@ impl TryFrom<db::Game> for Game {
 
 	fn try_from(game: db::Game) -> Result<Self, Self::Error> {
 		let board: chess::Game = game.board.parse()?;
-		let moves = game
-			.moves
-			.into_iter()
-			.map(|m| m.parse().map_err(|_| chess::Error::InvalidSanMove))
-			.collect::<Result<Vec<_>, _>>()?;
-
-		let pgn: Pgn = (&board, moves.as_slice()).into();
+		let pgn: Pgn = (&board, game.moves.as_slice()).into();
 
 		Ok(Self {
 			id: game.id,
@@ -80,7 +70,7 @@ impl TryFrom<db::Game> for Game {
 			black_id: game.black_id,
 			side_to_move: board.side_to_move(),
 			board,
-			moves,
+			moves: game.moves,
 			pgn,
 			result: game.result.and_then(|res| res.parse().ok()),
 		})
@@ -134,7 +124,7 @@ pub struct GameWithUsers {
 	pub black: UserWithAccounts,
 	pub board: chess::Game,
 	pub side_to_move: Color,
-	pub moves: Vec<SANChessMove>,
+	pub moves: Vec<String>,
 	pub result: Option<GameResult>,
 	pub pgn: Pgn,
 }

@@ -1,4 +1,4 @@
-use crate::{models::{game::Game, r#move::SANChessMove}, State};
+use crate::{models::game::Game, State};
 use chess::{ChessMove, Color};
 use serde::Deserialize;
 use tide::{Request, StatusCode};
@@ -26,15 +26,13 @@ pub async fn make_move(mut req: Request<State>) -> tide::Result {
 	match move_request {
 		MoveRequest::MakeMove(san) if is_users_turn => {
 			let board_move = ChessMove::from_san(&game.board.current_position(), &san)?;
-			let san_move = dbg!(san.parse::<SANChessMove>())?;
-			let san_move_str = dbg!(san_move.to_string());
 
 			game.board.make_move(board_move);
-			game.moves.push(san_move);
+			game.moves.push(san.clone());
 
 			sqlx::query!(
 				"update games set moves = array_append(moves, $1) where id = $2",
-				san_move_str,
+				san,
 				game.id
 			)
 			.execute(&mut txn)
