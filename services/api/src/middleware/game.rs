@@ -17,7 +17,7 @@ pub fn get_game<'a>(
 		if game_id == "current" {
 			let mut games = sqlx::query_as!(
 				db::Game,
-				r#"select games.id, games.white_id, games.black_id, games.board, games.moves, games.result
+				r#"select games.id, games.white_id, games.black_id, games.board, games.moves, games.result, games.created_at, games.modified_at
 from games
 left join users on users.id = games.black_id
 	or users.id = games.white_id
@@ -40,11 +40,12 @@ limit 2"#,
 		} else if game_id == "previous" {
 			let maybe_game = sqlx::query_as!(
 				db::Game,
-				r#"select games.id, games.white_id, games.black_id, games.board, games.moves, games.result
+				r#"select games.id, games.white_id, games.black_id, games.board, games.moves, games.result, games.created_at, games.modified_at
 from games
 left join users on users.id = games.black_id
 	or users.id = games.white_id
-where users.id = $1
+where users.id = $1 and games.result is not null
+order by modified_at desc
 limit 1"#,
 				user.id
 			)

@@ -1,3 +1,4 @@
+use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
 use sqlx::{types::Uuid, FromRow};
 use std::str::FromStr;
@@ -7,6 +8,8 @@ use strum::{EnumString, IntoStaticStr};
 pub struct User {
 	#[serde(with = "crate::serde::uuid")]
 	pub id: Uuid,
+	pub created_at: NaiveDateTime,
+	pub modified_at: NaiveDateTime,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, IntoStaticStr, EnumString)]

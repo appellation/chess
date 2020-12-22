@@ -9,12 +9,13 @@ edition = "2018"
 [dependencies]
 async-std = { version = "1.6.0", features = ["attributes"] }
 chess = { git = "https://github.com/appellation/chess-1", branch = "feat/serde", features = ["serde", "strum"] }
+chrono = "0.4.19"
 dotenv = "0.15.0"
 itertools = "0.9.0"
 nom = "6.0.1"
 rand = "0.7.3"
 serde = "1.0.117"
-sqlx = { version = "0.4.1", features = ["postgres", "uuid", "runtime-async-std-rustls", "offline"] }
+sqlx = { version = "0.4.1", features = ["postgres", "uuid", "runtime-async-std-rustls", "offline", "chrono"] }
 strum = { version = "0.19", features = ["derive"] }
 thiserror = "1.0"
 tide = "0.14.0"

@@ -72,7 +72,7 @@ impl TryFrom<db::Game> for Game {
 			.map(|m| m.parse().map_err(|_| chess::Error::InvalidSanMove))
 			.collect::<Result<Vec<_>, _>>()?;
 
-		let pgn: Pgn = dbg!((&board, moves.as_slice()).into());
+		let pgn: Pgn = (&board, moves.as_slice()).into();
 
 		Ok(Self {
 			id: game.id,

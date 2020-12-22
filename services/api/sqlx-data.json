@@ -1,34 +1,7 @@
 {
   "db": "PostgreSQL",
-  "07a54ab583b22e7efd76ac48772c06230bf5165c50a8de7e566b4f845733dcca": {
-    "query": "update games set board = $1, result = $2 where id = $3",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Varchar",
-          "Varchar",
-          "Uuid"
-        ]
-      },
-      "nullable": []
-    }
-  },
-  "3d923a3c377945bf7c437fc4214cabafc4277fee241ac5c0f965ff1e45c6a4d9": {
-    "query": "update games set moves = array_append(moves, $1) where id = $2",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Text",
-          "Uuid"
-        ]
-      },
-      "nullable": []
-    }
-  },
-  "521426fad3baed15d33622150d648c13aff8865747029bd8cb81fba1c8fb7455": {
-    "query": "select games.id, games.white_id, games.black_id, games.board, games.moves, games.result\nfrom games\nleft join users on users.id = games.black_id\n\tor users.id = games.white_id\nwhere users.id = $1 and games.result is null\nlimit 2",
+  "23b5cc1b20f931499e9aa717c0d32706352d79f51a37aff151cdcd8e9ee1fa47": {
+    "query": "select games.id, games.white_id, games.black_id, games.board, games.moves, games.result, games.created_at, games.modified_at\nfrom games\nleft join users on users.id = games.black_id\n\tor users.id = games.white_id\nwhere users.id = $1 and games.result is not null\norder by modified_at desc\nlimit 1",
     "describe": {
       "columns": [
         {
@@ -60,6 +33,16 @@
           "ordinal": 5,
           "name": "result",
           "type_info": "Varchar"
+        },
+        {
+          "ordinal": 6,
+          "name": "created_at",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 7,
+          "name": "modified_at",
+          "type_info": "Timestamp"
         }
       ],
       "parameters": {
@@ -73,7 +56,98 @@
         false,
         false,
         false,
-        true
+        true,
+        false,
+        false
+      ]
+    }
+  },
+  "298a3bec90e5a4e35dc0bd61627e626c7e6f775f10c76745e16cf08ef16550a4": {
+    "query": "update games set board = $1, result = $2, modified_at = now() where id = $3",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Varchar",
+          "Varchar",
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "3d923a3c377945bf7c437fc4214cabafc4277fee241ac5c0f965ff1e45c6a4d9": {
+    "query": "update games set moves = array_append(moves, $1) where id = $2",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "3e0ae1dabc9b2c29554e1cee323cf56911edad36d729281ca1c1ed3443537c69": {
+    "query": "select games.id, games.white_id, games.black_id, games.board, games.moves, games.result, games.created_at, games.modified_at\nfrom games\nleft join users on users.id = games.black_id\n\tor users.id = games.white_id\nwhere users.id = $1 and games.result is null\nlimit 2",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "white_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 2,
+          "name": "black_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 3,
+          "name": "board",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 4,
+          "name": "moves",
+          "type_info": "TextArray"
+        },
+        {
+          "ordinal": 5,
+          "name": "result",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 6,
+          "name": "created_at",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 7,
+          "name": "modified_at",
+          "type_info": "Timestamp"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        false
       ]
     }
   },
@@ -127,6 +201,16 @@
           "ordinal": 0,
           "name": "id",
           "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "created_at",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 2,
+          "name": "modified_at",
+          "type_info": "Timestamp"
         }
       ],
       "parameters": {
@@ -135,6 +219,8 @@
         ]
       },
       "nullable": [
+        false,
+        false,
         false
       ]
     }
@@ -172,6 +258,16 @@
           "ordinal": 5,
           "name": "result",
           "type_info": "Varchar"
+        },
+        {
+          "ordinal": 6,
+          "name": "created_at",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 7,
+          "name": "modified_at",
+          "type_info": "Timestamp"
         }
       ],
       "parameters": {
@@ -185,7 +281,9 @@
         false,
         false,
         false,
-        true
+        true,
+        false,
+        false
       ]
     }
   },
@@ -222,6 +320,16 @@
           "ordinal": 5,
           "name": "result",
           "type_info": "Varchar"
+        },
+        {
+          "ordinal": 6,
+          "name": "created_at",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 7,
+          "name": "modified_at",
+          "type_info": "Timestamp"
         }
       ],
       "parameters": {
@@ -237,7 +345,9 @@
         false,
         false,
         false,
-        true
+        true,
+        false,
+        false
       ]
     }
   },
@@ -249,6 +359,16 @@
           "ordinal": 0,
           "name": "id",
           "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "created_at",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 2,
+          "name": "modified_at",
+          "type_info": "Timestamp"
         }
       ],
       "parameters": {
@@ -258,6 +378,8 @@
         ]
       },
       "nullable": [
+        null,
+        null,
         null
       ]
     }
@@ -280,6 +402,16 @@
           "ordinal": 2,
           "name": "account_type",
           "type_info": "Varchar"
+        },
+        {
+          "ordinal": 3,
+          "name": "created_at",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 4,
+          "name": "modified_at",
+          "type_info": "Timestamp"
         }
       ],
       "parameters": {
@@ -288,6 +420,8 @@
         ]
       },
       "nullable": [
+        false,
+        false,
         false,
         false,
         false

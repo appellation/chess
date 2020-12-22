@@ -26,8 +26,8 @@ pub async fn make_move(mut req: Request<State>) -> tide::Result {
 	match move_request {
 		MoveRequest::MakeMove(san) if is_users_turn => {
 			let board_move = ChessMove::from_san(&game.board.current_position(), &san)?;
-			let san_move = san.parse::<SANChessMove>()?;
-			let san_move_str = san_move.to_string();
+			let san_move = dbg!(san.parse::<SANChessMove>())?;
+			let san_move_str = dbg!(san_move.to_string());
 
 			game.board.make_move(board_move);
 			game.moves.push(san_move);
@@ -59,7 +59,7 @@ pub async fn make_move(mut req: Request<State>) -> tide::Result {
 
 	let result: Option<&str> = game.board.result().map(|r| r.into());
 	sqlx::query!(
-		"update games set board = $1, result = $2 where id = $3",
+		"update games set board = $1, result = $2, modified_at = now() where id = $3",
 		game.board.current_position().to_string(),
 		result,
 		game.id

@@ -181,6 +181,24 @@ broker.on('MESSAGE_CREATE', async (message: Message, { ack }: AmqpResponseOption
 			respondToGame(message, game);
 			break;
 		}
+		case 'pgn': {
+			const res = await fetch(`${apiUrl}/games/previous`, {
+				method: 'get',
+				headers: {
+					'x-user-id': message.author.id,
+					'x-account-type': 'Discord',
+				},
+			});
+
+			if (!res.ok) {
+				proxy.post(`/channels/${message.channel_id}/messages`, { content: 'unable to get last game' }).catch(console.error);
+				return;
+			}
+
+			const game = await res.json();
+			proxy.post(`/channels/${message.channel_id}/messages`, { content: `\`\`\`\n${game.pgn}\n\`\`\`` }).catch(console.error);
+			break;
+		}
 	}
 });
 

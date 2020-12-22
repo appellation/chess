@@ -1,3 +1,4 @@
+use chrono::NaiveDateTime;
 use sqlx::{types::Uuid, FromRow};
 
 #[derive(Debug, Clone, FromRow)]
@@ -8,4 +9,6 @@ pub struct Game {
 	pub board: String,
 	pub moves: Vec<String>,
 	pub result: Option<String>,
+	pub created_at: NaiveDateTime,
+	pub modified_at: NaiveDateTime,
 }

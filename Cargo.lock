@@ -97,6 +97,7 @@ version = "0.1.0"
 dependencies = [
  "async-std",
  "chess",
+ "chrono",
  "dotenv",
  "itertools",
  "nom",
@@ -1884,6 +1885,7 @@ dependencies = [
  "bitflags",
  "byteorder",
  "bytes",
+ "chrono",
  "crc",
  "crossbeam-channel",
  "crossbeam-queue",

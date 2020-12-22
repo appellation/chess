@@ -37,6 +37,8 @@ pub fn get_user<'a>(
 
 				User {
 					id: user.id.unwrap(),
+					created_at: user.created_at.unwrap(),
+					modified_at: user.modified_at.unwrap(),
 				}
 			}
 			None => {

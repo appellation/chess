@@ -92,13 +92,13 @@ pub enum SANError {
 }
 
 fn parse_piece(input: &str) -> IResult<&str, Piece, VerboseError<&str>> {
-	map(opt(alt((
+	alt((
 		value(Piece::King, tag("K")),
 		value(Piece::Bishop, tag("B")),
 		value(Piece::Knight, tag("N")),
 		value(Piece::Queen, tag("Q")),
 		value(Piece::Rook, tag("R")),
-	))), |maybe_piece| maybe_piece.unwrap_or(Piece::Pawn))(input)
+	))(input)
 }
 
 fn parse_capture(input: &str) -> IResult<&str, bool, VerboseError<&str>> {
@@ -175,7 +175,7 @@ fn parse_move<'a>(input: &'a str) -> IResult<&'a str, SANChessMove, VerboseError
 		map(parse_eog_state, |state| SANChessMove::EOG(state)),
 		map(
 			tuple((
-				parse_piece,
+				map(opt(parse_piece), |maybe_piece| maybe_piece.unwrap_or(Piece::Pawn)),
 				alt((
 					map(parse_square, |square| ((None, None), false, square)),
 					tuple((parse_disambiguator, parse_capture, parse_square))
