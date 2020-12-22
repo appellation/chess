@@ -45,6 +45,7 @@ jobs:
           mv -f ../.env .
 
           chmod +x ./run.sh
+          docker system prune -f
           ./run.sh prod pull
           ./run.sh prod build
           ./run.sh prod up -d" | doctl compute ssh 215874001
