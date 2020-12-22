@@ -1,0 +1,11 @@
+{
+	"name": "move",
+	"description": "Make a move in your current game",
+	"options": [
+		{
+			"name": "notation",
+			"description": "Standard Algebraic Notation for current move",
+			"type": 3
+		}
+	]
+}

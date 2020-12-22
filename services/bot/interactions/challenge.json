@@ -1,0 +1,12 @@
+{
+	"name": "challenge",
+	"description": "Challenge another player to a game of chess!",
+	"options": [
+		{
+			"name": "opponent",
+			"description": "The person you're going to mercilessly destroy",
+			"type": 6,
+			"required": true
+		}
+	]
+}

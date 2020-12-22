@@ -1,0 +1,18 @@
+{
+	"name": "game",
+	"description": "Get your current game",
+	"options": [
+		{
+			"name": "info",
+			"description": "Specific information to retrieve",
+			"required": false,
+			"type": 3,
+			"choices": [
+				{
+					"name": "PGN",
+					"value": "pgn"
+				}
+			]
+		}
+	]
+}
