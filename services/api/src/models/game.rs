@@ -78,11 +78,13 @@ impl TryFrom<db::Game> for Game {
 }
 
 impl Game {
-	pub fn color_of(&self, user: &User) -> Option<Color> {
-		if user.id == self.black_id {
-			Some(Color::Black)
+	pub fn color_of(&self, user: &User) -> Option<UserColor> {
+		if user.id == self.black_id && user.id == self.white_id {
+			Some(UserColor::Both)
+		} else if user.id == self.black_id {
+			Some(UserColor::Black)
 		} else if user.id == self.white_id {
-			Some(Color::White)
+			Some(UserColor::White)
 		} else {
 			None
 		}
@@ -113,6 +115,33 @@ impl Game {
 			result: self.result,
 			pgn: self.pgn,
 		})
+	}
+}
+
+#[derive(Debug, Clone)]
+pub enum UserColor {
+	White,
+	Black,
+	Both,
+}
+
+impl PartialEq<Color> for UserColor {
+	fn eq(&self, other: &Color) -> bool {
+		match self {
+			Self::White => other == &Color::White,
+			Self::Black => other == &Color::Black,
+			Self::Both => true,
+		}
+	}
+}
+
+impl From<UserColor> for Option<Color> {
+	fn from(color: UserColor) -> Self {
+		match color {
+			UserColor::White => Some(Color::White),
+			UserColor::Black => Some(Color::Black),
+			UserColor::Both => None,
+		}
 	}
 }
 

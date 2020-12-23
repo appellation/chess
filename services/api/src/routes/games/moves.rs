@@ -1,4 +1,4 @@
-use crate::{models::game::Game, State};
+use crate::{State, models::game::{Game, UserColor}};
 use chess::{ChessMove, Color};
 use serde::Deserialize;
 use tide::{Request, StatusCode};
@@ -16,7 +16,7 @@ enum MoveRequest {
 pub async fn make_move(mut req: Request<State>) -> tide::Result {
 	let move_request: MoveRequest = req.body_json().await?;
 	let mut game = req.ext::<Game>().unwrap().clone();
-	let user_color = req.ext::<Color>().unwrap().clone();
+	let user_color = req.ext::<UserColor>().unwrap().clone();
 
 	let is_users_turn = user_color == game.side_to_move;
 
@@ -42,13 +42,13 @@ pub async fn make_move(mut req: Request<State>) -> tide::Result {
 			game.board.accept_draw();
 		}
 		MoveRequest::OfferDraw => {
-			game.board.offer_draw(user_color);
+			game.board.offer_draw(Option::<Color>::from(user_color).unwrap_or(Color::Black));
 		}
 		MoveRequest::DeclareDraw => {
 			game.board.declare_draw();
 		}
 		MoveRequest::Resign => {
-			game.board.resign(user_color);
+			game.board.resign(Option::<Color>::from(user_color).unwrap_or(Color::Black));
 		}
 		_ => return Ok(tide::Error::from_str(StatusCode::BadRequest, "Not your turn").into()),
 	}
