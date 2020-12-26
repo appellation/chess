@@ -83,10 +83,11 @@ broker.on('INTERACTION_CREATE', async (interaction: Interaction, { ack }: AmqpRe
 	console.log(require('util').inspect(interaction, { depth: Infinity }));
 
 	switch (interaction.type) {
-		case InteractionType.PING:
+		case InteractionType.PING: {
 			proxy.post(`/interactions/${interaction.id}/${interaction.token}/callback`, { type: 1 }).catch(console.error);
 			break;
-		case InteractionType.APPLICATION_COMMAND:
+		}
+		case InteractionType.APPLICATION_COMMAND: {
 			switch (interaction.data?.name) {
 				case 'ping': {
 					respond(interaction, 'pong');
@@ -194,7 +195,12 @@ broker.on('INTERACTION_CREATE', async (interaction: Interaction, { ack }: AmqpRe
 					respond(interaction, `\`\`\`\n${game.pgn}\n\`\`\``);
 					break;
 				}
+				case 'help': {
+					respond(interaction, 'check out my available slash (/) commands!');
+					break;
+				}
 			}
+		}
 	}
 });
 
