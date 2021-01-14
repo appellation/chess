@@ -21,7 +21,17 @@ services:
   nginx:
     ports:
       - 80:80
+  prometheus:
+    volumes:
+      - prometheus_data:/prometheus
+  grafana:
+    volumes:
+      - grafana_data:/var/lib/grafana
+    expose:
+      - "3000"
 
 volumes:
   postgres_data:
   redis_data:
+  prometheus_data:
+  grafana_data:

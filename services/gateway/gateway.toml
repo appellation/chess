@@ -8,3 +8,7 @@ group = "gateway"
 
 [amqp]
 url = "amqp://localhost"
+
+[prometheus]
+address = ":8080"
+endpoint = "/metrics"
