@@ -3,7 +3,7 @@ services:
   bot:
     image: docker.pkg.github.com/appellation/chess/bot
     environment:
-      BOARDS_URL: http://boards.chess.pleb.xyz
+      BOARDS_URL: http://boards.pleb.xyz
   gateway:
     image: docker.pkg.github.com/appellation/chess/gateway
   proxy:
